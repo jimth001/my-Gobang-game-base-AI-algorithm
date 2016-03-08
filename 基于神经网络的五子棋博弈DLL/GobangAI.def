@@ -1,0 +1,6 @@
+;GobangAI.lib : 导出DLL函数
+;作者：rmwang
+LIBRARY GobangAI
+EXPORTS 
+createInstanceOfAI
+test
