@@ -633,7 +633,6 @@ void player::computermakecmd(int *map, int &i, int &j, neuralnetworkofGobangBase
 	int x = 0, y = 0;
 	search(map, x, y, 0, 3, maxint, net);
 	//先搜3层.此状态下该zijixia
-	system("pause");
 	if (map[cmdi*size + cmdj] != 0)
 	{
 		cmdi = x;
