@@ -31,7 +31,7 @@ float player::valuefunc(int *p, int &x, int &y, neuralnetworkofGobangBaseFeature
 	else if (r == mystatus)  { /*printArray(p); system("pause");*/ return net.getshuchu() + maxint / 2; }
 	int tmp[size*size];
 	int i;
-	if (mystatus = baistatus)
+	if (mystatus == baistatus)
 	{
 		for (i = 0; i < size*size; i++)//我方执白，翻转之后在判断局势
 		{

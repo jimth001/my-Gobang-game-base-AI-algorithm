@@ -8,7 +8,7 @@ float feature::willwin(bool isyourturn)
 			//cout << "5.5route:" << endl;
 			return 5.5;
 		}
-		else if (alive33 > 0 || alive23 > 0 || halfalive33 > 0 || vir_alive33 > 0 || vir_alive23 > 0 || vir_halfalive23 > 0 || vir_halfalive33 > 0 || vir_halfdead33)//xiabu*4 2
+		else if (alive33 > 0 || alive23 > 0 || halfalive33 > 0 || vir_alive33 > 0 || vir_alive23 > 0 || vir_halfalive23 > 0 || vir_halfalive33 > 0 || vir_halfdead33>0)//xiabu*4 2
 		{
 			//cout << "4.5route:" << endl;
 			//cout << alive33 << " " << alive23 << " " << vir_halfdead33 << " " << vir_halfalive33 << " " << vir_halfalive23 << " " << vir_halfdead33 << " " << alive23 << " " << vir_alive23 << " " << halfalive33 << endl;
@@ -893,7 +893,7 @@ void feature::search_nodes(int *map, int size)//求交叉点，确定双三，三四个数
 	{
 		for (j = 0; j < halfalive[i].num; j++)
 		{
-			if (abs(halfalive[i].vir_si - halfalive[i].vir_ei) >= 4 || abs(halfalive[i].vir_sj - halfalive[i].vir_ej) >= 4)
+			if (abs(halfalive[i].vir_si[j] - halfalive[i].vir_ei[j]) >= 4 || abs(halfalive[i].vir_sj[j] - halfalive[i].vir_ej[j]) >= 4)
 			{
 				p[k].len = i + 1;//实长度
 				p[k].vir_si = halfalive[i].vir_si[j];//虚坐标
@@ -902,10 +902,10 @@ void feature::search_nodes(int *map, int size)//求交叉点，确定双三，三四个数
 				p[k].vir_ej = halfalive[i].vir_ej[j];
 				p[k].direction = halfalive[i].direction[j];
 				p[k].isalive = false;
-				p[k].virlen = abs(halfalive[i].vir_si - halfalive[i].vir_ei) + 1;//虚长度
+				p[k].virlen = abs(halfalive[i].vir_si[j] - halfalive[i].vir_ei[j]) + 1;//虚长度
 				if (p[k].virlen == 1)
 				{
-					p[k].virlen = abs(halfalive[i].vir_sj - halfalive[i].vir_ej) + 1;
+					p[k].virlen = abs(halfalive[i].vir_sj[j] - halfalive[i].vir_ej[j]) + 1;
 				}
 				k++;
 			}
@@ -915,7 +915,7 @@ void feature::search_nodes(int *map, int size)//求交叉点，确定双三，三四个数
 	{
 		for (j = 0; j < alive[i].num; j++)
 		{
-			if (abs(alive[i].vir_si - alive[i].vir_ei) >= 4 || abs(alive[i].vir_sj - alive[i].vir_ej) >= 4)
+			if (abs(alive[i].vir_si[j] - alive[i].vir_ei[j]) >= 4 || abs(alive[i].vir_sj[j] - alive[i].vir_ej[j]) >= 4)//虚长度为5，即s-e==4，虚长度>=5才有成的可能
 			{
 				p[k].len = i + 1;//实长度
 				p[k].vir_si = alive[i].vir_si[j];//虚坐标
@@ -924,10 +924,10 @@ void feature::search_nodes(int *map, int size)//求交叉点，确定双三，三四个数
 				p[k].vir_ej = alive[i].vir_ej[j];
 				p[k].direction = alive[i].direction[j];
 				p[k].isalive = true;
-				p[k].virlen = abs(alive[i].vir_si - alive[i].vir_ei) + 1;//虚长度
+				p[k].virlen = abs(alive[i].vir_si[j] - alive[i].vir_ei[j]) + 1;//虚长度
 				if (p[k].virlen == 1)
 				{
-					p[k].virlen = abs(alive[i].vir_sj - alive[i].vir_ej) + 1;
+					p[k].virlen = abs(alive[i].vir_sj[j] - alive[i].vir_ej[j]) + 1;
 				}
 				k++;
 			}
