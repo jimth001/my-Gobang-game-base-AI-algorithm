@@ -359,7 +359,7 @@ int player::judge(int *tmap, int &x, int &y, int lenlian)//判断棋局
 		return heiwin;
 	return notfinish;
 }
-float player::search(int *p, int &ix, int &jy, int depth, int depthlimit, float rootvalue, neuralnetworkofGobangBaseFeature & net)//depth当前树的深度，根节点为0，depthlimit树深度的限制,如果层数是01234，则一共有5层.首次搜索rootvalue值任意
+float player::search(int *p, int &ix, int &jy, int depth, int depthlimit, float rootvalue, neuralnetworkofGobangBaseFeature & net,int x_first_search_node,int y_first_search_node)//depth当前树的深度，根节点为0，depthlimit树深度的限制,如果层数是01234，则一共有5层.首次搜索rootvalue值任意
 {
 
 	float value = 0;
@@ -383,9 +383,9 @@ float player::search(int *p, int &ix, int &jy, int depth, int depthlimit, float 
 	{
 		int x, y;
 		//先搜右下角：
-		for (x = size / 2; x < size; x++)
+		for (x = x_first_search_node; x < size; x++)
 		{
-			for (y = size / 2; y < size; y++)
+			for (y = y_first_search_node; y < size; y++)
 			{
 				if (p[x*size + y] == 0)//未下子
 				{
@@ -444,9 +444,9 @@ float player::search(int *p, int &ix, int &jy, int depth, int depthlimit, float 
 			}
 		}
 		//再搜右上角：
-		for (x = size / 2; x >= 0; x--)
+		for (x = x_first_search_node; x >= 0; x--)
 		{
-			for (y = size / 2; y < size; y++)
+			for (y = y_first_search_node; y < size; y++)
 			{
 				if (p[x*size + y] == 0)//未下子
 				{
@@ -505,9 +505,9 @@ float player::search(int *p, int &ix, int &jy, int depth, int depthlimit, float 
 			}
 		}
 		//再搜左上角：
-		for (x = size / 2; x >= 0; x--)
+		for (x = x_first_search_node; x >= 0; x--)
 		{
-			for (y = size / 2; y >= 0; y--)
+			for (y = y_first_search_node; y >= 0; y--)
 			{
 				if (p[x*size + y] == 0)//未下子
 				{
@@ -566,9 +566,9 @@ float player::search(int *p, int &ix, int &jy, int depth, int depthlimit, float 
 			}
 		}
 		//再搜左下角：
-		for (x = size / 2; x < size; x++)
+		for (x = x_first_search_node; x < size; x++)
 		{
-			for (y = size / 2; y >= 0; y--)
+			for (y = y_first_search_node; y >= 0; y--)
 			{
 				if (p[x*size + y] == 0)//未下子
 				{
@@ -631,15 +631,57 @@ float player::search(int *p, int &ix, int &jy, int depth, int depthlimit, float 
 void player::computermakecmd(int *map, int &i, int &j, neuralnetworkofGobangBaseFeature & net){
 	tmpcounter = 0;
 	int x = 0, y = 0;
+	clock_t start, end;
+	start = clock();
 	search(map, x, y, 0, 3, maxint, net);
+	end = clock();
+	std::cout << "3层用时：" << end - start << " , 结果：" << x << "  " << y << std::endl;
+	/*int recx = x, recy = y;
+	start = clock();
+	search(map, x, y, 0, 5, maxint, net, recx, recy);
+	end = clock();
+	std::cout << "5层用时：" << end - start << " , 结果：" << x << "  " << y << std::endl;
+
+	recx = x; recy = y;
+	start = clock();
+	search(map, x, y, 0, 5, maxint, net, recx, recy);
+	end = clock();
+	std::cout << "5层用时：" << end - start << " , 结果：" << x << "  " << y << std::endl;*/
+
+	
 	//先搜3层.此状态下该zijixia
+
+	std::cout << cmdi << " asdjh " << cmdj << std::endl;
 	if (map[cmdi*size + cmdj] != 0)
 	{
 		cmdi = x;
 		cmdj = y;
+		
+	}
+	else
+	{
+		std::cout << cmdi << "  " << cmdj << std::endl;
 	}
 	i = cmdi;
 	j = cmdj;
+	std::cout << "i,j=" << i << "  " << j << std::endl;
+
+
+
+	int recx = cmdi, recy = cmdj;
+	start = clock();
+	search(map, x, y, 0, 5, maxint, net, recx, recy);
+	end = clock();
+	std::cout << "5层用时：" << end - start << " , 结果：" << cmdi << "  " << cmdj << std::endl;
+	if (map[cmdi*size + cmdj] != 0)
+	{
+		cmdi = x;
+		cmdj = y;
+
+	}
+	i = cmdi;
+	j = cmdj;
+	system("pause");
 }
 /*void waitpersonmakecmd(int *map, int &i, int &j){//等待出招
 cout << "请输入坐标" << endl;

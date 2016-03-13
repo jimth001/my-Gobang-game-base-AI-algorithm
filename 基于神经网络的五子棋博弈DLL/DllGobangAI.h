@@ -97,7 +97,8 @@ public:int mystatus;//身份，黑棋还是白棋
 	   int myid;//id为0代表己方，为1代表对手
 	   static const int computer = 0;
 	   static const int person = 1;
-	   int cmdi, cmdj;
+	   int cmdi;//用于记录搜索结果，除非局面为必输，否则一定会更新
+	   int cmdj;//用于记录搜索结果，若局面为必输，则cmdi，cmdj不更新，维持上次决策值不变。此时需要下一个子，这个子由search中引用的参数x，y决定
 	   float maxint;
 	   float minint;
 	   static const int heistatus = 1;
@@ -115,7 +116,7 @@ public:int mystatus;//身份，黑棋还是白棋
 	   float max(float a, float b);
 	   float min(float a, float b);
 	   int judge(int *tmap, int &x, int &y, int lenlian);
-	   float search(int *p, int &ix, int &jy, int depth, int depthlimit, float rootvalue, neuralnetworkofGobangBaseFeature & net);
+	   float search(int *p, int &ix, int &jy, int depth, int depthlimit, float rootvalue, neuralnetworkofGobangBaseFeature & net, int x_first_search_node = size / 2, int y_first_search_node = size / 2);
 	   void computermakecmd(int *map, int &i, int &j, neuralnetworkofGobangBaseFeature & net);
 	   void setmyid(int id);
 };

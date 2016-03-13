@@ -692,7 +692,7 @@ void feature::extend_feature(int *map, int size, int color)//特征自扩展,输入自扩
 				halfalive[k].vir_sj[i] = tmpj + 1;
 				tmpi = halfalive[k].endi[i];
 				tmpj = halfalive[k].endj[i];
-				while (tmpj < size)
+				while (tmpj < size)//正向扫描
 				{
 					
 					if (map[tmpi*size + tmpj] != 0 && map[tmpi*size + tmpj] != color)
@@ -715,7 +715,7 @@ void feature::extend_feature(int *map, int size, int color)//特征自扩展,输入自扩
 				halfalive[k].vir_sj[i] = tmpj;
 				tmpi = halfalive[k].endi[i];
 				tmpj = halfalive[k].endj[i];
-				while (tmpi < size)
+				while (tmpi < size)//正向扫描
 				{
 					
 					if (map[tmpi*size + tmpj] != 0 && map[tmpi*size + tmpj] != color)
@@ -802,7 +802,7 @@ void feature::extend_feature(int *map, int size, int color)//特征自扩展,输入自扩
 				alive[k].vir_sj[i] = tmpj + 1;
 				tmpi = alive[k].endi[i];
 				tmpj = alive[k].endj[i];
-				while (tmpj < size)
+				while (tmpj < size)//正向扫描
 				{
 					
 					if (map[tmpi*size + tmpj] != 0 && map[tmpi*size + tmpj] != color)
@@ -825,7 +825,7 @@ void feature::extend_feature(int *map, int size, int color)//特征自扩展,输入自扩
 				alive[k].vir_sj[i] = tmpj;
 				tmpi = alive[k].endi[i];
 				tmpj = alive[k].endj[i];
-				while (tmpi < size)
+				while (tmpi < size)//正向扫描
 				{
 					
 					if (map[tmpi*size + tmpj] != 0 && map[tmpi*size + tmpj] != color)
