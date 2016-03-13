@@ -226,14 +226,15 @@ AIforGobangGame*   createInstanceOfAI(int status, int turn, const char * src,int
 		}
 		else//不是初始局面，记录
 		{
-			stepmap[this_turn][step] = tmp;
-			step++;
+			stepmap[this_turn][step[this_turn]] = tmp;
+			step[this_turn]++;
 		}
 	}
 	void AIforGobangGame::init()
 	{
 		iswin = false;
-		step = 0;
+		step[0] = 0;
+		step[1] = 0;
 	}
 	AIforGobangGame::AIforGobangGame(int status, int turn, float qz1[96][48], float qz2[48], int search_para)
 	{
@@ -242,7 +243,8 @@ AIforGobangGame*   createInstanceOfAI(int status, int turn, const char * src,int
 		p = player(myStatus, 0,search_para);
 		mynet = neuralnetworkofGobangBaseFeature(qz1, qz2);
 		AIturn = turn;
-		step = 0;
+		step[0] = 0;
+		step[1] = 0;
 	}
 	AIforGobangGame::AIforGobangGame(int status, int turn, neuralnetworkofGobangBaseFeature &net, int search_para)
 	{
@@ -251,7 +253,8 @@ AIforGobangGame*   createInstanceOfAI(int status, int turn, const char * src,int
 		p = player(myStatus, 0,search_para);
 		mynet = net;
 		AIturn = turn;
-		step = 0;
+		step[0] = 0;
+		step[1] = 0;
 	}
 	AIforGobangGame::AIforGobangGame(int status, int turn, const char * src, int search_para)//status是AI的状态，表示执白还是执黑，turn是轮到AI下的时候轮换变量应该等于的值。如果自己实现控制流程也可弃用此变量
 		//建议使用1和-1作为轮换变量，变更时*-1，1为黑，-1为白，初始为1
@@ -262,7 +265,8 @@ AIforGobangGame*   createInstanceOfAI(int status, int turn, const char * src,int
 		myStatus = status;
 		p = player(myStatus, 0,search_para);
 		AIturn = turn;
-		step = 0;
+		step[0] = 0;
+		step[1] = 0;
 		bool isexist = false;
 		std::fstream file;
 		file.open(src, std::ios::_Nocreate | std::ios::in);
@@ -332,12 +336,18 @@ AIforGobangGame*   createInstanceOfAI(int status, int turn, const char * src,int
 	}
 	void AIforGobangGame::TD_study()
 	{
-		mynet.TD_study(stepmap[(search_layer+1)%2], step, iswin);//只记录了未成五子的棋局，因此没有step和step-1之分
-		for (int r = 0; r < step; r++)//学习完毕，释放空间
+		mynet.TD_study(stepmap[(search_layer + 1) % 2], step[(search_layer + 1) % 2], iswin);//只记录了未成五子的棋局，因此没有step和step-1之分
+		for (int r = 0; r < step[0]; r++)//学习完毕，释放空间
 		{
 			free(stepmap[0][r]);
-			free(stepmap[1][r]);
+			
 		}
+		for (int r = 0; r < step[1]; r++)//学习完毕，释放空间
+		{
+			free(stepmap[1][r]);
+
+		}
+		
 	}
 	int AIforGobangGame::judge(int *map)//判断棋局状态
 	{

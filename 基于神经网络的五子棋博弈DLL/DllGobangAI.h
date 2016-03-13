@@ -127,9 +127,9 @@ class DLL_Gobang_AI_API AIforGobangGame
 {
 private:
 	int search_layer;
-	int myStatus;
+	int myStatus;//1为黑，-1为白
 	int *stepmap[2][size*size];//记录对局情况的，0对应的局面应当自己下，1对应的局面应当对手下
-	int step;
+	int step[2];
 	player p;
 	neuralnetworkofGobangBaseFeature mynet;
 	bool iswin;

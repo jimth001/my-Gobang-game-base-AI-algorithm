@@ -669,7 +669,7 @@ void player::computermakecmd(int *map, int &i, int &j, neuralnetworkofGobangBase
 
 
 
-	int recx = cmdi, recy = cmdj;
+	/*int recx = cmdi, recy = cmdj;
 	start = clock();
 	search(map, x, y, 0, 5, maxint, net, recx, recy);
 	end = clock();
@@ -681,7 +681,7 @@ void player::computermakecmd(int *map, int &i, int &j, neuralnetworkofGobangBase
 
 	}
 	i = cmdi;
-	j = cmdj;
+	j = cmdj;*/
 	system("pause");
 }
 /*void waitpersonmakecmd(int *map, int &i, int &j){//µÈ´ý³öÕÐ
