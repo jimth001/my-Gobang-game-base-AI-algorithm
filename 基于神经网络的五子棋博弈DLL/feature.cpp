@@ -683,9 +683,10 @@ void feature::extend_feature(int *map, int size, int color)//特征自扩展,输入自扩
 				tmpj = halfalive[k].startj[i];
 				while (tmpj >= 0)//反向扫描
 				{
-					tmpj--;
+					
 					if (map[tmpi*size + tmpj] != 0 && map[tmpi*size + tmpj] != color)//当前点是对方的棋子时退出
 						break;
+					tmpj--;
 				}
 				halfalive[k].vir_si[i] = tmpi;
 				halfalive[k].vir_sj[i] = tmpj + 1;
@@ -693,9 +694,10 @@ void feature::extend_feature(int *map, int size, int color)//特征自扩展,输入自扩
 				tmpj = halfalive[k].endj[i];
 				while (tmpj < size)
 				{
-					tmpj++;
+					
 					if (map[tmpi*size + tmpj] != 0 && map[tmpi*size + tmpj] != color)
 						break;
+					tmpj++;
 				}
 				halfalive[k].vir_ei[i] = tmpi;
 				halfalive[k].vir_ej[i] = tmpj - 1;
@@ -704,9 +706,10 @@ void feature::extend_feature(int *map, int size, int color)//特征自扩展,输入自扩
 				tmpj = halfalive[k].startj[i];
 				while (tmpi >= 0)//反向扫描
 				{
-					tmpi--;
+					
 					if (map[tmpi*size + tmpj] != 0 && map[tmpi*size + tmpj] != color)//当前点是对方的棋子时退出
 						break;
+					tmpi--;
 				}
 				halfalive[k].vir_si[i] = tmpi + 1;
 				halfalive[k].vir_sj[i] = tmpj;
@@ -714,9 +717,10 @@ void feature::extend_feature(int *map, int size, int color)//特征自扩展,输入自扩
 				tmpj = halfalive[k].endj[i];
 				while (tmpi < size)
 				{
-					tmpi++;
+					
 					if (map[tmpi*size + tmpj] != 0 && map[tmpi*size + tmpj] != color)
 						break;
+					tmpi++;
 				}
 				halfalive[k].vir_ei[i] = tmpi - 1;
 				halfalive[k].vir_ej[i] = tmpj;
@@ -725,10 +729,11 @@ void feature::extend_feature(int *map, int size, int color)//特征自扩展,输入自扩
 				tmpj = halfalive[k].startj[i];
 				while (tmpi >= 0 && tmpj >= 0)//反向扫描
 				{
-					tmpi--;
-					tmpj--;
+					
 					if (map[tmpi*size + tmpj] != 0 && map[tmpi*size + tmpj] != color)
 						break;
+					tmpi--;
+					tmpj--;
 				}
 				halfalive[k].vir_si[i] = tmpi + 1;
 				halfalive[k].vir_sj[i] = tmpj + 1;
@@ -736,10 +741,11 @@ void feature::extend_feature(int *map, int size, int color)//特征自扩展,输入自扩
 				tmpj = halfalive[k].endj[i];
 				while (tmpi < size&&tmpj < size)//正向扫描
 				{
-					tmpi++;
-					tmpj++;
+					
 					if (map[tmpi*size + tmpj] != 0 && map[tmpi*size + tmpj] != color)
 						break;
+					tmpi++;
+					tmpj++;
 				}
 				halfalive[k].vir_ei[i] = tmpi - 1;
 				halfalive[k].vir_ej[i] = tmpj - 1;
@@ -748,10 +754,11 @@ void feature::extend_feature(int *map, int size, int color)//特征自扩展,输入自扩
 				tmpj = halfalive[k].startj[i];
 				while (tmpi < size && tmpj >= 0)//反向扫描
 				{
-					tmpi++;
-					tmpj--;
+					
 					if (map[tmpi*size + tmpj] != 0 && map[tmpi*size + tmpj] != color)
 						break;
+					tmpi++;
+					tmpj--;
 				}
 				halfalive[k].vir_si[i] = tmpi - 1;
 				halfalive[k].vir_sj[i] = tmpj + 1;
@@ -759,10 +766,11 @@ void feature::extend_feature(int *map, int size, int color)//特征自扩展,输入自扩
 				tmpj = halfalive[k].endj[i];
 				while (tmpi >= 0 && tmpj < size)//正向扫描
 				{
-					tmpi--;
-					tmpj++;
+					
 					if (map[tmpi*size + tmpj] != 0 && map[tmpi*size + tmpj] != color)
 						break;
+					tmpi--;
+					tmpj++;
 				}
 				halfalive[k].vir_ei[i] = tmpi + 1;
 				halfalive[k].vir_ej[i] = tmpj - 1;
@@ -785,9 +793,10 @@ void feature::extend_feature(int *map, int size, int color)//特征自扩展,输入自扩
 				tmpj = alive[k].startj[i];
 				while (tmpj >= 0)//反向扫描
 				{
-					tmpj--;
+					
 					if (map[tmpi*size + tmpj] != 0 && map[tmpi*size + tmpj] != color)//当前点是对方的棋子时退出
 						break;
+					tmpj--;
 				}
 				alive[k].vir_si[i] = tmpi;
 				alive[k].vir_sj[i] = tmpj + 1;
@@ -795,9 +804,10 @@ void feature::extend_feature(int *map, int size, int color)//特征自扩展,输入自扩
 				tmpj = alive[k].endj[i];
 				while (tmpj < size)
 				{
-					tmpj++;
+					
 					if (map[tmpi*size + tmpj] != 0 && map[tmpi*size + tmpj] != color)
 						break;
+					tmpj++;
 				}
 				alive[k].vir_ei[i] = tmpi;
 				alive[k].vir_ej[i] = tmpj - 1;
@@ -806,9 +816,10 @@ void feature::extend_feature(int *map, int size, int color)//特征自扩展,输入自扩
 				tmpj = alive[k].startj[i];
 				while (tmpi >= 0)//反向扫描
 				{
-					tmpi--;
+					
 					if (map[tmpi*size + tmpj] != 0 && map[tmpi*size + tmpj] != color)//当前点是对方的棋子时退出
 						break;
+					tmpi--;
 				}
 				alive[k].vir_si[i] = tmpi + 1;
 				alive[k].vir_sj[i] = tmpj;
@@ -816,9 +827,10 @@ void feature::extend_feature(int *map, int size, int color)//特征自扩展,输入自扩
 				tmpj = alive[k].endj[i];
 				while (tmpi < size)
 				{
-					tmpi++;
+					
 					if (map[tmpi*size + tmpj] != 0 && map[tmpi*size + tmpj] != color)
 						break;
+					tmpi++;
 				}
 				alive[k].vir_ei[i] = tmpi - 1;
 				alive[k].vir_ej[i] = tmpj;
@@ -827,10 +839,11 @@ void feature::extend_feature(int *map, int size, int color)//特征自扩展,输入自扩
 				tmpj = alive[k].startj[i];
 				while (tmpi >= 0 && tmpj >= 0)//反向扫描
 				{
-					tmpi--;
-					tmpj--;
+					
 					if (map[tmpi*size + tmpj] != 0 && map[tmpi*size + tmpj] != color)
 						break;
+					tmpi--;
+					tmpj--;
 				}
 				alive[k].vir_si[i] = tmpi + 1;
 				alive[k].vir_sj[i] = tmpj + 1;
@@ -838,10 +851,11 @@ void feature::extend_feature(int *map, int size, int color)//特征自扩展,输入自扩
 				tmpj = alive[k].endj[i];
 				while (tmpi < size&&tmpj < size)//正向扫描
 				{
-					tmpi++;
-					tmpj++;
+					
 					if (map[tmpi*size + tmpj] != 0 && map[tmpi*size + tmpj] != color)
 						break;
+					tmpi++;
+					tmpj++;
 				}
 				alive[k].vir_ei[i] = tmpi - 1;
 				alive[k].vir_ej[i] = tmpj - 1;
@@ -850,10 +864,11 @@ void feature::extend_feature(int *map, int size, int color)//特征自扩展,输入自扩
 				tmpj = alive[k].startj[i];
 				while (tmpi < size && tmpj >= 0)//反向扫描
 				{
-					tmpi++;
-					tmpj--;
+					
 					if (map[tmpi*size + tmpj] != 0 && map[tmpi*size + tmpj] != color)
 						break;
+					tmpi++;
+					tmpj--;
 				}
 				alive[k].vir_si[i] = tmpi - 1;
 				alive[k].vir_sj[i] = tmpj + 1;
@@ -861,10 +876,11 @@ void feature::extend_feature(int *map, int size, int color)//特征自扩展,输入自扩
 				tmpj = alive[k].endj[i];
 				while (tmpi >= 0 && tmpj < size)//正向扫描
 				{
-					tmpi--;
-					tmpj++;
+					
 					if (map[tmpi*size + tmpj] != 0 && map[tmpi*size + tmpj] != color)
 						break;
+					tmpi--;
+					tmpj++;
 				}
 				alive[k].vir_ei[i] = tmpi + 1;
 				alive[k].vir_ej[i] = tmpj - 1;
