@@ -8,8 +8,9 @@ player::player()
 	maxint = 10000000;
 	minint = -10000000;
 }
-player::player(int sta, int id)
+player::player(int sta, int id, int search_para)
 {
+	search_layer = search_para;
 	mystatus = sta;
 	cmdi = 0;
 	cmdj = 0;
@@ -21,7 +22,7 @@ player::player(int sta, int id)
 		//报错
 	}
 }
-float player::valuefunc(int *p, int &x, int &y, neuralnetworkofGobangBaseFeature & net){//估值函数
+float player::valuefunc(int *p, int &x, int &y, neuralnetworkofGobangBaseFeature & net,bool is_computer_turn){//估值函数
 	//要根据我方执黑/白对+1-1进行转化：
 	//默认我方（电脑） 白
 	int r = notfinish;
@@ -53,10 +54,10 @@ float player::valuefunc(int *p, int &x, int &y, neuralnetworkofGobangBaseFeature
 	}
 	net.cal_shuchu();
 	float tmpf;
-	tmpf = net.wofangf.willwin(true);
-	tmpf -= net.duifangf.willwin(false);
-	if (tmpf > 0.3) { /*printArray(tmp); system("pause"); */return net.getshuchu() + maxint / 100 * tmpf; }
-	else if (tmpf < -0.3) { /*printArray(tmp); system("pause");*/ return net.getshuchu() + maxint / 100 * tmpf; }
+	tmpf = net.wofangf.willwin(is_computer_turn);
+	tmpf -= net.duifangf.willwin(!is_computer_turn);
+	if (tmpf > 0.3) { /*printArray(tmp); system("pause"); */return net.getshuchu() + maxint / 100 * tmpf+net.wofangf.count_win_num(is_computer_turn); }
+	else if (tmpf < -0.3) { /*printArray(tmp); system("pause");*/ return net.getshuchu() + maxint / 100 * tmpf + net.duifangf.count_win_num(!is_computer_turn); }
 	//cout << "valuefunc:" << net.getshuchu()<<endl;
 	return net.getshuchu();
 }
@@ -374,7 +375,7 @@ float player::search(int *p, int &ix, int &jy, int depth, int depthlimit, float 
 	}
 	if (depth == depthlimit - 1)
 	{
-		value = valuefunc(p, ix, jy, net);
+		value = valuefunc(p, ix, jy, net,depthlimit%2==1);
 		//cout << "cengshu" << depth << "zhi:" << value << endl;
 		tmpcounter++;
 		return value;
@@ -633,7 +634,7 @@ void player::computermakecmd(int *map, int &i, int &j, neuralnetworkofGobangBase
 	int x = 0, y = 0;
 	clock_t start, end;
 	start = clock();
-	search(map, x, y, 0, 3, maxint, net);
+	search(map, x, y, 0, search_layer, maxint, net);
 	end = clock();
 	std::cout << "3层用时：" << end - start << " , 结果：" << x << "  " << y << std::endl;
 	/*int recx = x, recy = y;

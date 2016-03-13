@@ -107,7 +107,7 @@ void neuralnetworkofGobangBaseFeature::TD_study(int **step, int stepnum, bool is
 	}
 	while (stepnum >= 0)
 	{
-		writeMapIntoTXT(step[stepnum]);
+		//writeMapIntoTXT(step[stepnum]);
 		getshuru(step[stepnum]);
 		cal_shuchu();
 		feedback(expectedvalue);

@@ -43,6 +43,23 @@ float feature::willwin(bool isyourturn)
 		else { return 0; }
 	}
 }
+float feature::count_win_num(bool isyourturn)
+{
+	float rst = 0;
+	if (isyourturn == true)
+	{
+		rst = rst + (float)5.5*(alive[3].num + halfalive[3].num);
+		rst += (float)4.5*(alive33 + alive23 + halfalive33 + vir_alive33 + vir_alive23 + vir_halfalive23 + vir_halfalive33 + vir_halfdead33);
+		rst += (float)3.5*vir_alive22;
+		
+	}
+	else{
+		rst -= (float)5 * (alive[3].num + halfalive34 + halfalive44 + halfdead44 + vir_halfalive34 + vir_halfalive44 + vir_halfdead44);
+		rst -= (float)4 * (alive33 + vir_alive33);
+		
+	}
+	return rst;
+}
 feature::feature(){
 	dead[0].num = 0;
 	dead[1].num = 0;

@@ -66,6 +66,7 @@ public:
 	int direction4 = 4;//右上斜
 	float willwin(bool isyourturn);
 	feature();
+	float count_win_num(bool isyourturn);
 	bool vaild_ij_check(int t);
 	void heiOrbai_extractfeature(int *map, int size, int color);
 	void extend_feature(int *map, int size, int color);
@@ -101,6 +102,7 @@ public:int mystatus;//身份，黑棋还是白棋
 	   int cmdj;//用于记录搜索结果，若局面为必输，则cmdi，cmdj不更新，维持上次决策值不变。此时需要下一个子，这个子由search中引用的参数x，y决定
 	   float maxint;
 	   float minint;
+	   int search_layer;
 	   static const int heistatus = 1;
 	   static const int baistatus = -1;
 	   static const int heiwin = 1;//黑赢
@@ -111,8 +113,9 @@ public:int mystatus;//身份，黑棋还是白棋
 	   static const int baizi = -1;
 	   static const int nilzi = 0;
 	   player();
-	   player(int sta, int id);
-	   float valuefunc(int *p, int &x, int &y, neuralnetworkofGobangBaseFeature & net);
+	   player(int sta, int id, int search_para);
+	   
+	   float valuefunc(int *p, int &x, int &y, neuralnetworkofGobangBaseFeature & net, bool is_computer_turn);
 	   float max(float a, float b);
 	   float min(float a, float b);
 	   int judge(int *tmap, int &x, int &y, int lenlian);
@@ -123,14 +126,15 @@ public:int mystatus;//身份，黑棋还是白棋
 class DLL_Gobang_AI_API AIforGobangGame
 {
 private:
+	int search_layer;
 	int myStatus;
-	int *stepmap[size*size];
+	int *stepmap[2][size*size];//记录对局情况的，0对应的局面应当自己下，1对应的局面应当对手下
 	int step;
 	player p;
 	neuralnetworkofGobangBaseFeature mynet;
 	bool iswin;
 	int judge_result(int *map);
-	void record(int *map);
+	void record(int *map,int this_turn);//this_turn指的是，当前局面，该哪一方下，若该电脑下，则为0，该对手下，为1
 public:
 	//常量部分：
 	static const int heiwin = 1;//黑赢
@@ -143,9 +147,9 @@ public:
 	//
 	int AIturn;
 	void init();
-	AIforGobangGame(int status, int turn, float qz1[96][48], float qz2[48]);
-	AIforGobangGame(int status, int turn, neuralnetworkofGobangBaseFeature &net);
-	AIforGobangGame(int status, int turn, const char * src);
+	AIforGobangGame(int status, int turn, float qz1[96][48], float qz2[48],int search_para);
+	AIforGobangGame(int status, int turn, neuralnetworkofGobangBaseFeature &net, int search_para);
+	AIforGobangGame(int status, int turn, const char * src, int search_para);
 	void makecmd(int *map, int &i, int &j);
 	void saveWeight(const char * src);
 	void judge_iswin(int winner);

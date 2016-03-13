@@ -4,9 +4,9 @@ void  test()
 	std::cout << "hello" << std::endl;
 }
 
-AIforGobangGame*   createInstanceOfAI(int status, int turn, const char * src)
+AIforGobangGame*   createInstanceOfAI(int status, int turn, const char * src,int search_para)
 {
-	return new AIforGobangGame(status, turn, src);
+	return new AIforGobangGame(status, turn, src,search_para);
 }
 	int AIforGobangGame::judge_result(int *map)//判断当前棋局是baiwin还是heiwin还是尚未结束
 	{
@@ -194,15 +194,20 @@ AIforGobangGame*   createInstanceOfAI(int status, int turn, const char * src)
 		}
 		return notfinish;
 	}
-	void AIforGobangGame::record(int *map)//记录中己方子为1，不论黑白
+	void AIforGobangGame::record(int *map,int this_turn)//记录中己方子为1，不论黑白
 	{
 		int *tmp = (int *)malloc(size*size*sizeof(int));//记录对手下完的局面
 		int k;
+		bool is_init_map = true;//判断是否为初始局面。即无子状态。
 		if (myStatus == p.baistatus)//如果AI执白棋，记录棋局时先翻转
 		{
 			for (k = 0; k < size*size; k++)
 			{
 				tmp[k] = map[k] * (-1);
+			}
+			if (tmp[k] != 0)
+			{
+				is_init_map = false;
 			}
 		}
 		else {
@@ -210,38 +215,52 @@ AIforGobangGame*   createInstanceOfAI(int status, int turn, const char * src)
 			{
 				tmp[k] = map[k];
 			}
+			if (tmp[k] != 0)
+			{
+				is_init_map = false;
+			}
 		}
-		stepmap[step] = tmp;
-		step++;
+		if (is_init_map)//初始局面不记录
+		{
+			free(tmp);
+		}
+		else//不是初始局面，记录
+		{
+			stepmap[this_turn][step] = tmp;
+			step++;
+		}
 	}
 	void AIforGobangGame::init()
 	{
 		iswin = false;
 		step = 0;
 	}
-	AIforGobangGame::AIforGobangGame(int status, int turn, float qz1[96][48], float qz2[48])
+	AIforGobangGame::AIforGobangGame(int status, int turn, float qz1[96][48], float qz2[48], int search_para)
 	{
+		search_layer = search_para;
 		myStatus = status;
-		p = player(myStatus, 0);
+		p = player(myStatus, 0,search_para);
 		mynet = neuralnetworkofGobangBaseFeature(qz1, qz2);
 		AIturn = turn;
 		step = 0;
 	}
-	AIforGobangGame::AIforGobangGame(int status, int turn, neuralnetworkofGobangBaseFeature &net)
+	AIforGobangGame::AIforGobangGame(int status, int turn, neuralnetworkofGobangBaseFeature &net, int search_para)
 	{
+		search_layer = search_para;
 		myStatus = status;
-		p = player(myStatus, 0);
+		p = player(myStatus, 0,search_para);
 		mynet = net;
 		AIturn = turn;
 		step = 0;
 	}
-	AIforGobangGame::AIforGobangGame(int status, int turn, const char * src)//status是AI的状态，表示执白还是执黑，turn是轮到AI下的时候轮换变量应该等于的值。如果自己实现控制流程也可弃用此变量
+	AIforGobangGame::AIforGobangGame(int status, int turn, const char * src, int search_para)//status是AI的状态，表示执白还是执黑，turn是轮到AI下的时候轮换变量应该等于的值。如果自己实现控制流程也可弃用此变量
 		//建议使用1和-1作为轮换变量，变更时*-1，1为黑，-1为白，初始为1
 		//status必须为1或-1，黑棋为1，白棋为-1
 		//src为权值文件路径，文件不存在时自动新建网络
 	{
+		search_layer = search_para;
 		myStatus = status;
-		p = player(myStatus, 0);
+		p = player(myStatus, 0,search_para);
 		AIturn = turn;
 		step = 0;
 		bool isexist = false;
@@ -273,8 +292,11 @@ AIforGobangGame*   createInstanceOfAI(int status, int turn, const char * src)
 	}
 	void AIforGobangGame::makecmd(int *map, int &i, int &j)//对方未成五子时才会调用，因此只会记录未成五子的棋局
 	{
-		record(map);
-		p.computermakecmd(map, i, j, mynet);
+		record(map,0);
+		p.computermakecmd(map, i, j, mynet);//i,j为做出的决策，不改变map
+		map[i*size + j] = myStatus;//下了子之后的局面
+		record(map, 1);//记录
+		map[i*size + j] = 0;//还原map
 	}
 	void AIforGobangGame::saveWeight(const char * src)//导出权值
 	{
@@ -310,10 +332,11 @@ AIforGobangGame*   createInstanceOfAI(int status, int turn, const char * src)
 	}
 	void AIforGobangGame::TD_study()
 	{
-		mynet.TD_study(stepmap, step, iswin);//只记录了未成五子的棋局，因此没有step和step-1之分
+		mynet.TD_study(stepmap[(search_layer+1)%2], step, iswin);//只记录了未成五子的棋局，因此没有step和step-1之分
 		for (int r = 0; r < step; r++)//学习完毕，释放空间
 		{
-			free(stepmap[r]);
+			free(stepmap[0][r]);
+			free(stepmap[1][r]);
 		}
 	}
 	int AIforGobangGame::judge(int *map)//判断棋局状态
