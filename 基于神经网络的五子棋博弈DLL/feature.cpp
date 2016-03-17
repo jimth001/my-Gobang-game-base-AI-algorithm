@@ -86,7 +86,7 @@ bool feature::vaild_ij_check(int t)//false是非法
 		return false;
 	else return true;
 }
-void feature::heiOrbai_extractfeature(int *map, int size, int color)//提取基本特征，提取特征之前必须先判正负，不然此函数会数组越界
+void feature::heiOrbai_extractfeature(int *map, int size, int color)//提取基本特征，获得的是实连棋子，提取特征之前必须先判正负，不然此函数会数组越界
 {
 	int i, j;
 	//行扫描：
@@ -928,7 +928,7 @@ void feature::search_nodes(int *map, int size)//求交叉点，确定双三，三四个数
 		{
 			if (abs(halfalive[i].vir_si[j] - halfalive[i].vir_ei[j]) >= 4 || abs(halfalive[i].vir_sj[j] - halfalive[i].vir_ej[j]) >= 4)
 			{
-				p[k].len = i + 1;//实长度
+				p[k].len = i + 1;//实长度//................................................
 				p[k].vir_si = halfalive[i].vir_si[j];//虚坐标
 				p[k].vir_sj = halfalive[i].vir_sj[j];
 				p[k].vir_ei = halfalive[i].vir_ei[j];

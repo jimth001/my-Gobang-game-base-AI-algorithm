@@ -204,30 +204,43 @@ AIforGobangGame*   createInstanceOfAI(int status, int turn, const char * src,int
 			for (k = 0; k < size*size; k++)
 			{
 				tmp[k] = map[k] * (-1);
+				if (map[k] != 0)
+				{
+					is_init_map = false;
+				}
 			}
-			if (tmp[k] != 0)
-			{
-				is_init_map = false;
-			}
+			
 		}
 		else {
 			for (k = 0; k < size*size; k++)
 			{
 				tmp[k] = map[k];
+				if (map[k] != 0)
+				{
+					is_init_map = false;
+				}
 			}
-			if (tmp[k] != 0)
-			{
-				is_init_map = false;
-			}
+			
 		}
-		if (is_init_map)//初始局面不记录
+		if (is_init_map==true)//初始局面不记录
 		{
 			free(tmp);
 		}
 		else//不是初始局面，记录
 		{
-			stepmap[this_turn][step[this_turn]] = tmp;
+			stepmap[this_turn*size*size+step[this_turn]] = tmp;
 			step[this_turn]++;
+			/*std::cout << "map 000:" << std::endl;
+			//调试代码段
+			for (int x = 0; x < 15; x++)
+			{
+				for (int y = 0; y < 15; y++)
+				{
+
+					std::cout << tmp[x*size + y] << "  ";
+				}
+				std::cout << std::endl;
+			}*/
 		}
 	}
 	void AIforGobangGame::init()
@@ -336,15 +349,15 @@ AIforGobangGame*   createInstanceOfAI(int status, int turn, const char * src,int
 	}
 	void AIforGobangGame::TD_study()
 	{
-		mynet.TD_study(stepmap[(search_layer + 1) % 2], step[(search_layer + 1) % 2], iswin);//只记录了未成五子的棋局，因此没有step和step-1之分
+		mynet.TD_study(stepmap, step[(search_layer + 1) % 2], iswin);//只记录了未成五子的棋局，因此没有step和step-1之分
 		for (int r = 0; r < step[0]; r++)//学习完毕，释放空间
 		{
-			free(stepmap[0][r]);
+			free(stepmap[r]);
 			
 		}
 		for (int r = 0; r < step[1]; r++)//学习完毕，释放空间
 		{
-			free(stepmap[1][r]);
+			free(stepmap[size*size+r]);
 
 		}
 		

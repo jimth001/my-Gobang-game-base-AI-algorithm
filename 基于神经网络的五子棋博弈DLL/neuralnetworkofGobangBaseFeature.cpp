@@ -4,8 +4,24 @@ float neuralnetworkofGobangBaseFeature::getshuchu()
 {
 	return shuchu;
 }
-void neuralnetworkofGobangBaseFeature::getshuru(int  *map)
+void neuralnetworkofGobangBaseFeature::getshuru(int  *map,bool tiaoshi_switch)
 {
+	/*if (tiaoshi_switch)
+	{
+	//调试代码段
+		std::cout << "map:" << std::endl;
+
+		for (int x = 0; x < 15; x++)
+		{
+			for (int y = 0; y < 15; y++)
+			{
+
+				std::cout << map[x*size + y] << "  ";
+			}
+			std::cout << std::endl;
+		}
+	}*/
+	
 	wofangf.clear();
 	duifangf.clear();
 	wofangf.heiOrbai_extractfeature(map, size, 1);//前48个是我方特征
@@ -95,6 +111,8 @@ neuralnetworkofGobangBaseFeature::neuralnetworkofGobangBaseFeature(float tmp1[96
 	learnrate = (float)0.5;
 }
 void neuralnetworkofGobangBaseFeature::TD_study(int **step, int stepnum, bool iswin){//最后一步不学习，含5个子的都不学习
+	
+
 	float expectedvalue;
 	stepnum--;//此时stepnum是数组中最后一个值
 
@@ -108,7 +126,7 @@ void neuralnetworkofGobangBaseFeature::TD_study(int **step, int stepnum, bool is
 	while (stepnum >= 0)
 	{
 		//writeMapIntoTXT(step[stepnum]);
-		getshuru(step[stepnum]);
+		getshuru(step[stepnum],true);
 		cal_shuchu();
 		feedback(expectedvalue);
 		cal_shuchu();

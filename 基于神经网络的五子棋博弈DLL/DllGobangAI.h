@@ -86,12 +86,12 @@ public:
 	float learnrate;
 	feature wofangf = feature(), duifangf = feature();
 	float getshuchu();
-	void getshuru(int  *map);
+	void getshuru(int  *map, bool tiaoshi_switch=false);
 	void cal_shuchu();
 	void feedback(float goal);
 	neuralnetworkofGobangBaseFeature();
 	neuralnetworkofGobangBaseFeature(float tmp1[96][48], float tmp2[48]);
-	void TD_study(int **step, int stepnum, bool iswin);
+	void TD_study(int**step, int stepnum, bool iswin);
 };
 class DLL_Gobang_AI_API player{
 public:int mystatus;//身份，黑棋还是白棋
@@ -128,7 +128,7 @@ class DLL_Gobang_AI_API AIforGobangGame
 private:
 	int search_layer;
 	int myStatus;//1为黑，-1为白
-	int *stepmap[2][size*size];//记录对局情况的，0对应的局面应当自己下，1对应的局面应当对手下
+	int *stepmap[2*size*size];//记录对局情况的，0对应的局面应当自己下，1对应的局面应当对手下
 	int step[2];
 	player p;
 	neuralnetworkofGobangBaseFeature mynet;

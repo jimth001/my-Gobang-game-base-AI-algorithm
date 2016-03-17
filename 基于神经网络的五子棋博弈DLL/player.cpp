@@ -28,8 +28,8 @@ float player::valuefunc(int *p, int &x, int &y, neuralnetworkofGobangBaseFeature
 	int r = notfinish;
 	r = judge(p, x, y, 5);
 	//baiwin=-1,heiwin=1
-	if (r == (mystatus*(-1))) { /*printArray(p); system("pause");*/return net.getshuchu() + minint / 2; }
-	else if (r == mystatus)  { /*printArray(p); system("pause");*/ return net.getshuchu() + maxint / 2; }
+	if (r == (mystatus*(-1))) { /*printArray(p); system("pause");*/return  minint / 2; }
+	else if (r == mystatus)  { /*printArray(p); system("pause");*/ return  maxint / 2; }
 	int tmp[size*size];
 	int i;
 	if (mystatus == baistatus)
@@ -632,11 +632,18 @@ float player::search(int *p, int &ix, int &jy, int depth, int depthlimit, float 
 void player::computermakecmd(int *map, int &i, int &j, neuralnetworkofGobangBaseFeature & net){
 	tmpcounter = 0;
 	int x = 0, y = 0;
-	clock_t start, end;
-	start = clock();
-	search(map, x, y, 0, search_layer, maxint, net);
-	end = clock();
-	std::cout << "3层用时：" << end - start << " , 结果：" << x << "  " << y << std::endl;
+	if (search_layer % 2 == 1)
+	{
+		search(map, x, y, 0, 3, maxint, net);//先搜3层
+	}
+	else{
+		search(map, x, y, 0, 2, maxint, net);//先搜2层
+	}
+	//clock_t start, end;
+	//start = clock();
+	if(search_layer>3) search(map, x, y, 0, search_layer, maxint, net,cmdi,cmdj);//拿少数层搜索的结果作为搜索起点
+	//end = clock();
+	//std::cout << search_layer<<"层用时：" << end - start << " , 结果：" << cmdi << "  " << cmdj << std::endl;
 	/*int recx = x, recy = y;
 	start = clock();
 	search(map, x, y, 0, 5, maxint, net, recx, recy);
@@ -652,7 +659,7 @@ void player::computermakecmd(int *map, int &i, int &j, neuralnetworkofGobangBase
 	
 	//先搜3层.此状态下该zijixia
 
-	std::cout << cmdi << " asdjh " << cmdj << std::endl;
+	//std::cout << cmdi << " asdjh " << cmdj << std::endl;
 	if (map[cmdi*size + cmdj] != 0)
 	{
 		cmdi = x;
@@ -661,14 +668,11 @@ void player::computermakecmd(int *map, int &i, int &j, neuralnetworkofGobangBase
 	}
 	else
 	{
-		std::cout << cmdi << "  " << cmdj << std::endl;
+		//std::cout << cmdi << "  " << cmdj << std::endl;
 	}
 	i = cmdi;
 	j = cmdj;
-	std::cout << "i,j=" << i << "  " << j << std::endl;
-
-
-
+	//std::cout << "i,j=" << i << "  " << j << std::endl;
 	/*int recx = cmdi, recy = cmdj;
 	start = clock();
 	search(map, x, y, 0, 5, maxint, net, recx, recy);
@@ -682,7 +686,7 @@ void player::computermakecmd(int *map, int &i, int &j, neuralnetworkofGobangBase
 	}
 	i = cmdi;
 	j = cmdj;*/
-	system("pause");
+	//system("pause");
 }
 /*void waitpersonmakecmd(int *map, int &i, int &j){//等待出招
 cout << "请输入坐标" << endl;
