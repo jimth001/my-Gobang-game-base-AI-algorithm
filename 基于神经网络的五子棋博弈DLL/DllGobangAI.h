@@ -8,6 +8,7 @@
 #include <math.h>
 #include <fstream>
 #include <iomanip>
+#include <vector>
 extern int tmpcounter ;
 static const int size = 15;
 static const char * input_src = "e:\\input.txt";
@@ -70,9 +71,10 @@ public:
 	bool vaild_ij_check(int t);
 	void heiOrbai_extractfeature(int *map, int size, int color);
 	void extend_feature(int *map, int size, int color);
-	void search_nodes(int *map, int size);
-	int is_crossing(int si, int sj, int ei, int ej, int sx, int sy, int ex, int ey, int *map, int d1, int d2);
+	void search_nodes(int *map, int size,int color);
+	int is_crossing(int si, int sj, int ei, int ej, int sx, int sy, int ex, int ey, int *map, int d1, int d2,int color);
 	int max(int a, int b);
+	int min(int a, int b);
 	void clear();
 	void input(float shuru[], int pyl);
 };

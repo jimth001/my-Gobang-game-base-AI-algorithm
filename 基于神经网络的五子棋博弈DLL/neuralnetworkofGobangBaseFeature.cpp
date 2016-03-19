@@ -26,11 +26,11 @@ void neuralnetworkofGobangBaseFeature::getshuru(int  *map,bool tiaoshi_switch)
 	duifangf.clear();
 	wofangf.heiOrbai_extractfeature(map, size, 1);//前48个是我方特征
 	wofangf.extend_feature(map, size, 1);
-	wofangf.search_nodes(map, size);
+	wofangf.search_nodes(map, size,1);
 	wofangf.input(shuru, 0);
 	duifangf.heiOrbai_extractfeature(map, size, -1);
 	duifangf.extend_feature(map, size, -1);
-	duifangf.search_nodes(map, size);
+	duifangf.search_nodes(map, size,-1);
 	duifangf.input(shuru, 48);
 	int i;
 	float sum = 0;
