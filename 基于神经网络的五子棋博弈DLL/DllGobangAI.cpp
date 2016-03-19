@@ -349,7 +349,7 @@ AIforGobangGame*   createInstanceOfAI(int status, int turn, const char * src,int
 	}
 	void AIforGobangGame::TD_study()
 	{
-		mynet.TD_study(stepmap, step[(search_layer + 1) % 2], iswin);//只记录了未成五子的棋局，因此没有step和step-1之分
+		mynet.TD_study(&stepmap[size*size*(search_layer + 1) % 2], step[(search_layer + 1) % 2], iswin);//只记录了未成五子的棋局，因此没有step和step-1之分
 		for (int r = 0; r < step[0]; r++)//学习完毕，释放空间
 		{
 			free(stepmap[r]);
