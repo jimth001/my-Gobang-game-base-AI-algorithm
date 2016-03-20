@@ -1,5 +1,7 @@
 package GomoKu;
 
+import java.util.ArrayList;
+import java.util.Iterator;
 import javax.swing.JOptionPane;
 
 class  Dead{
@@ -137,6 +139,23 @@ public float willwin(boolean isyourturn)
 		}*/
 		else { return 0; }
 	}
+}
+public float count_win_num(boolean isyourturn)
+{
+	float rst = 0;
+	if (isyourturn == true)
+	{
+		rst = rst + (float)5.5*(alive[3].num + halfalive[3].num);
+		rst += (float)4.5*(alive33 + alive23 + halfalive33 + vir_alive33 + vir_alive23 + vir_halfalive23 + vir_halfalive33 + vir_halfdead33);
+		rst += (float)3.5*vir_alive22;
+		
+	}
+	else{
+		rst -= (float)5 * (alive[3].num + halfalive34 + halfalive44 + halfdead44 + vir_halfalive34 + vir_halfalive44 + vir_halfdead44);
+		rst -= (float)4 * (alive33 + vir_alive33);
+		
+	}
+	return rst;
 }
 public Feature()
 {
@@ -1002,22 +1021,35 @@ public void extend_feature(int []map, int size, int color)
 		}
 	}
 }
-public void search_nodes(int []map, int size)
-//求交叉点，确定双三，三四个数
+public void search_nodes(int []map, int size,int color)//求交叉点，确定双三，三四个数
 {
+	/*//调试信息start
+	system("cls");
+	for (int r1 = 0; r1 < size; r1++)
+	{
+		for (int r2 = 0; r2 < size; r2++)
+		{
+			std::cout << map[r1*size + r2] <<"  ";
+		}
+		std::cout << std::endl;
+	}
+	//调试信息end*/
 	int i, j, k;
 	int sum = 0;//所有活棋和半活棋的数量
+	sum += halfalive[0].num;
 	sum += halfalive[1].num;
 	sum += halfalive[2].num;
 	sum += halfalive[3].num;
+	sum += alive[0].num;
 	sum += alive[1].num;
 	sum += alive[2].num;
 	sum += alive[3].num;
-	Sumforsearch p[]=new Sumforsearch[sum];
-	for(i=0;i<sum;i++)
-	{
-		p[i]=new Sumforsearch();
-	}
+	//
+	//..
+	ArrayList<Sumforsearch> p =new ArrayList<Sumforsearch>(sum);
+	//System.out.println(p.size());
+	//sumforsearch *p = NULL;
+	//p = (struct sumforsearch *)malloc(sum*sizeof(sumforsearch));
 	k = 0;
 	//预处理1，半活棋和活棋放到sumforsearch里，处理掉不能成五子的
 	for (i = 1; i < 4; i++)
@@ -1026,17 +1058,18 @@ public void search_nodes(int []map, int size)
 		{
 			if (Math.abs(halfalive[i].vir_si[j] - halfalive[i].vir_ei[j]) >= 4 || Math.abs(halfalive[i].vir_sj[j] - halfalive[i].vir_ej[j]) >= 4)
 			{
-				p[k].len = i + 1;//实长度
-				p[k].vir_si = halfalive[i].vir_si[j];//虚坐标
-				p[k].vir_sj = halfalive[i].vir_sj[j];
-				p[k].vir_ei = halfalive[i].vir_ei[j];
-				p[k].vir_ej = halfalive[i].vir_ej[j];
-				p[k].direction = halfalive[i].direction[j];
-				p[k].isalive = false;
-				p[k].virlen = Math.abs(halfalive[i].vir_si[j] - halfalive[i].vir_ei[j]) + 1;//虚长度
-				if (p[k].virlen == 1)
+				p.add(new Sumforsearch());
+				p.get(k).len = i + 1;//实长度//................................................
+				p.get(k).vir_si = halfalive[i].vir_si[j];//虚坐标
+				p.get(k).vir_sj = halfalive[i].vir_sj[j];
+				p.get(k).vir_ei = halfalive[i].vir_ei[j];
+				p.get(k).vir_ej = halfalive[i].vir_ej[j];
+				p.get(k).direction = halfalive[i].direction[j];
+				p.get(k).isalive = false;
+				p.get(k).virlen = Math.abs(halfalive[i].vir_si[j] - halfalive[i].vir_ei[j]) + 1;//虚长度
+				if (p.get(k).virlen == 1)
 				{
-					p[k].virlen = Math.abs(halfalive[i].vir_sj[j] - halfalive[i].vir_ej[j]) + 1;
+					p.get(k).virlen = Math.abs(halfalive[i].vir_sj[j] - halfalive[i].vir_ej[j]) + 1;
 				}
 				k++;
 			}
@@ -1046,70 +1079,687 @@ public void search_nodes(int []map, int size)
 	{
 		for (j = 0; j < alive[i].num; j++)
 		{
-			if (Math.abs(alive[i].vir_si[j] - alive[i].vir_ei[j]) >= 4 || Math.abs(alive[i].vir_sj[j] - alive[i].vir_ej[j]) >= 4)
+			if (Math.abs(alive[i].vir_si[j] - alive[i].vir_ei[j]) >= 4 || Math.abs(alive[i].vir_sj[j] - alive[i].vir_ej[j]) >= 4)//虚长度为5，即s-e==4，虚长度>=5才有成的可能
 			{
-				p[k].len = i + 1;//实长度
-				p[k].vir_si = alive[i].vir_si[j];//虚坐标
-				p[k].vir_sj = alive[i].vir_sj[j];
-				p[k].vir_ei = alive[i].vir_ei[j];
-				p[k].vir_ej = alive[i].vir_ej[j];
-				p[k].direction = alive[i].direction[j];
-				p[k].isalive = true;
-				p[k].virlen = Math.abs(alive[i].vir_si[j] - alive[i].vir_ei[j]) + 1;//虚长度
-				if (p[k].virlen == 1)
+				p.add(new Sumforsearch());
+				p.get(k).len = i + 1;//实长度
+				p.get(k).vir_si = alive[i].vir_si[j];//虚坐标
+				p.get(k).vir_sj = alive[i].vir_sj[j];
+				p.get(k).vir_ei = alive[i].vir_ei[j];
+				p.get(k).vir_ej = alive[i].vir_ej[j];
+				p.get(k).direction = alive[i].direction[j];
+				p.get(k).isalive = true;
+				p.get(k).virlen = Math.abs(alive[i].vir_si[j] - alive[i].vir_ei[j]) + 1;//虚长度
+				if (p.get(k).virlen == 1)
 				{
-					p[k].virlen = Math.abs(alive[i].vir_sj[j] - alive[i].vir_ej[j]) + 1;
+					p.get(k).virlen = Math.abs(alive[i].vir_sj[j] - alive[i].vir_ej[j]) + 1;
 				}
 				k++;
 			}
 		}
 	}
+	//System.out.println(p.size());
+	
 	sum = k;//此时sum是p数组中有效值的个数
-	//预处理2,更新sumforsearch里连棋的实际长度
+	//消除等价P【k】：hash位图
+	char hash_array[] = new char[7500];
+	for(int tc=0;tc<7500;tc++)
+	{
+		hash_array[tc]=0;
+	}
+	int hash_value_of_ij;
+	//Vector<Sumforsearch> tmp_p= new Vector<Sumforsearch>();
+	Iterator<Sumforsearch> sListIterator = p.iterator();
+	while (sListIterator.hasNext())
+	{
+		Sumforsearch tmp_Sumforsearch=sListIterator.next();
+		hash_value_of_ij = tmp_Sumforsearch.vir_si * 15 * 15 * 15 + tmp_Sumforsearch.vir_sj * 15 * 15 + tmp_Sumforsearch.vir_ei * 15 + tmp_Sumforsearch.vir_ej;
+		int ts, tmod;
+		ts = hash_value_of_ij / 8;
+		tmod = hash_value_of_ij % 8;
+		char tmp_ym = (char)(Math.pow(2,tmod));//掩码
+		char tmp = (char) (hash_array[ts] &tmp_ym);
+		char t_judge = 0;
+		if (tmp == t_judge)//不存在
+		{
+			hash_array[ts] = (char) (hash_array[ts] | tmp_ym);
+		}
+		else{
+			sListIterator.remove();
+		}
+	}
+	//
+	sum = p.size();
+	//预处理2,更新sumforsearch里连棋的实际长度--------important!
 	for (i = 0; i < sum; i++)
 	{
-		int tmpi;
-		int tmpj;
 		int counter;
-		switch (p[i].direction)
+		boolean meet_space = false;
+		boolean find_next_s = false;
+		int nextsj ,nextsi;
+		int tsj, tej, tsi, tei;
+		boolean first_save = false;
+		int circle_times;//循环控制变量
+		switch (p.get(i).direction)
 		{
-		case 1:tmpj = p[i].vir_sj;
-			counter = 0;
-			while (tmpj <= p[i].vir_ej)
+		case 1: counter = 0;
+			tsj = p.get(i).vir_sj;
+			tej = p.get(i).vir_sj;
+			meet_space = false;
+			find_next_s = false;
+			first_save = false;
+			nextsj = p.get(i).vir_sj;
+			circle_times = p.get(i).vir_ej;
+			while (tej<=circle_times)
 			{
-				if (map[p[i].vir_si*size + tmpj] != 0)
+				if (map[p.get(i).vir_si*size + tej] != 0)//有子
+				{
+					counter++;
+					if (find_next_s == false)//没找到开头
+					{
+						if (meet_space == false)//没遇到空格
+						{
+							nextsj = tej;
+						}
+						else{
+							nextsj = tej;
+							find_next_s = true;
+						}
+						
+					}
+					tej++;
+				}
+				else{//此时tej指向空格
+					if (meet_space == false)
+					{
+						if (counter == 0)
+						{
+							while (tej <= circle_times&&map[p.get(i).vir_si*size + tej] == 0)
+							{
+								tej++;
+								tsj++;
+							}
+						}
+						else
+						{
+							meet_space = true;
+							tej++;
+						}
+					}
+					else{
+						if (counter == 1)
+						{
+							tsj++;
+							tej = tsj;
+							meet_space = false;
+							find_next_s = false;
+							counter = 0;
+							first_save = true;
+							continue;
+						}
+						if (first_save==false)
+						{
+							p.get(i).len = counter;
+							p.get(i).vir_ej = nextsj;
+							p.get(i).vir_sj = tsj;
+							if (tsj == 0 ||(tsj>=0&& map[p.get(i).vir_si*size + tsj - 1] != 0))
+							{
+								p.get(i).isalive = false;
+							}
+							else{
+								p.get(i).isalive = true;
+							}
+							tsj = nextsj;
+							tej = tsj;
+							meet_space = false;
+							find_next_s = false;
+							counter = 0;
+							first_save = true;
+						}
+						else{
+							p.add(new Sumforsearch());
+							p.get(p.size() - 1).vir_sj = tsj;
+							p.get(p.size() - 1).vir_ej = nextsj;
+							p.get(p.size() - 1).vir_si = p.get(i).vir_si;
+							p.get(p.size() - 1).vir_ei = p.get(i).vir_ei;
+							p.get(p.size() - 1).direction = p.get(i).direction;
+							p.get(p.size() - 1).isalive = true;
+							p.get(p.size() - 1).len = counter;
+							tsj = nextsj;
+							tej = tsj;
+							meet_space = false;
+							find_next_s = false;
+							counter = 0;
+							first_save = true;
+						}
+					}
+				}
+				/*if (map[p.get(i).vir_si*size + tmpj] != 0)//此处没必要要color
 				{
 					counter++;
 				}
-				tmpj++;
+				tmpj++;*/
+				
 			}
-			p[i].len = counter;
-			break;
-		case 2:tmpi = p[i].vir_si; counter = 0;
-			while (tmpi <= p[i].vir_ei)
+			//p.get(i).len = counter;
+			if (counter > 1)
 			{
-				if (map[tmpi*size + p[i].vir_sj] != 0)
+				if (first_save == false)
+				{
+					p.get(i).len = counter;
+					p.get(i).vir_sj = tsj;
+					p.get(i).vir_ej = nextsj;
+					if (nextsj == size - 1 || (nextsj < size - 1 && map[p.get(i).vir_si*size + nextsj + 1] != 0))
+					{
+						p.get(i).isalive = false;
+					}
+					else
+					{
+						if (tsj == 0 || (tsj >= 0 && map[p.get(i).vir_si*size + tsj - 1] != 0))
+						{
+							p.get(i).isalive = false;
+						}
+						else{
+							p.get(i).isalive = true;
+						}
+					}
+				}
+				else{
+					p.add(new Sumforsearch());
+					p.get(p.size() - 1).vir_sj = tsj;
+					p.get(p.size() - 1).vir_ej = nextsj;
+					p.get(p.size() - 1).vir_si = p.get(i).vir_si;
+					p.get(p.size() - 1).vir_ei = p.get(i).vir_ei;
+					p.get(p.size() - 1).direction = p.get(i).direction;
+					if (nextsj == size-1 ||(nextsj<size-1&& map[p.get(i).vir_si*size + nextsj+1] != 0))
+					{
+						p.get(p.size() - 1).isalive = false;
+					}
+					else
+					{
+						p.get(p.size() - 1).isalive = true;
+					}
+					p.get(p.size() - 1).len = counter;
+				}
+			}
+			
+			break;
+		case 2:counter = 0;
+			tsi = p.get(i).vir_si;
+			tei = p.get(i).vir_si;
+			meet_space = false;
+			find_next_s = false;
+			nextsi = p.get(i).vir_si;
+			first_save = false;
+			circle_times = p.get(i).vir_ei;
+			while (tei <= circle_times)
+			{
+				if (map[tei*size + p.get(i).vir_sj] != 0)//有子
+				{
+					counter++;
+					if (find_next_s == false)//没找到开头
+					{
+						if (meet_space == false)//没遇到空格
+						{
+							nextsi = tei;
+						}
+						else{
+							nextsi = tei;
+							find_next_s = true;
+						}
+
+					}
+					tei++;
+				}
+				else{//此时tej指向空格
+					if (meet_space == false)
+					{
+						if (counter == 0)
+						{
+							while (tei <= circle_times&&map[p.get(i).vir_sj + tei*size] == 0)
+							{
+								tei++;
+								tsi++;
+							}
+						}
+						else
+						{
+							meet_space = true;
+							tei++;
+						}
+					}
+					else{
+						if (counter == 1)
+						{
+							tsi++;
+							tei = tsi;
+							meet_space = false;
+							find_next_s = false;
+							counter = 0;
+							first_save = true;
+							continue;
+						}
+						if (first_save==false)
+						{
+							p.get(i).len = counter;
+							p.get(i).vir_si = tsi;
+							p.get(i).vir_ei = nextsi;
+							if (tsi == 0 ||(tsi-1>=0&& map[(tsi-1)*size + p.get(i).vir_sj] != 0))
+							{
+								p.get(i).isalive = false;
+							}
+							else{
+								p.get(i).isalive = true;
+							}
+							tsi = nextsi;
+							tei = tsi;
+							meet_space = false;
+							find_next_s = false;
+							counter = 0;
+							first_save = true;
+						}
+						else{
+							p.add(new Sumforsearch());
+							p.get(p.size() - 1).vir_sj = p.get(i).vir_sj;
+							p.get(p.size() - 1).vir_ej = p.get(i).vir_ej;
+							p.get(p.size() - 1).vir_si = tsi;
+							p.get(p.size() - 1).vir_ei = nextsi;
+							p.get(p.size() - 1).direction = p.get(i).direction;
+							p.get(p.size() - 1).isalive = true;
+							p.get(p.size() - 1).len = counter;
+							tsi = nextsi;
+							tei = tsi;
+							meet_space = false;
+							find_next_s = false;
+							counter = 0;
+							first_save = true;
+						}
+					}
+				}
+				/*if (map[p.get(i).vir_si*size + tmpj] != 0)//此处没必要要color
+				{
+				counter++;
+				}
+				tmpj++;*/
+
+			}
+			//p.get(i).len = counter;
+			if (counter > 1)
+			{
+				if (first_save == false)
+				{
+					p.get(i).len = counter;
+					p.get(i).vir_si = tsi;
+					p.get(i).vir_ei = nextsi;
+					if (nextsi == size - 1 || (nextsi < size - 1 && map[p.get(i).vir_sj + (nextsi + 1)*size] != 0))
+					{
+						p.get(i).isalive = false;
+					}
+					else
+					{
+						if (tsi == 0 || (tsi - 1 >= 0 && map[(tsi - 1)*size + p.get(i).vir_sj] != 0))
+						{
+							p.get(i).isalive = false;
+						}
+						else{
+							p.get(i).isalive = true;
+						}
+					}
+				}
+				else{
+					p.add(new Sumforsearch());
+					p.get(p.size() - 1).vir_sj = p.get(i).vir_sj;
+					p.get(p.size() - 1).vir_ej = p.get(i).vir_ej;
+					p.get(p.size() - 1).vir_si = tsi;
+					p.get(p.size() - 1).vir_ei = nextsi;
+					p.get(p.size() - 1).direction = p.get(i).direction;
+					if (nextsi == size-1 || (nextsi<size-1&&map[p.get(i).vir_sj + (nextsi+1)*size] != 0))
+					{
+						p.get(p.size() - 1).isalive = false;
+					}
+					else
+					{
+						p.get(p.size() - 1).isalive = true;
+					}
+					p.get(p.size() - 1).len = counter;
+				}
+			}
+			
+			//........
+			/*tmpi = p.get(i).vir_si, counter = 0;
+			while (tmpi <= p.get(i).vir_ei)
+			{
+				if (map[tmpi*size + p.get(i).vir_sj] == 0)
 				{
 					counter++;
 				}
 				tmpi++;
 			}
-			p[i].len = counter;
+			p.get(i).len = counter;*/
 			break;
-		case 3:tmpi = p[i].vir_si; tmpj = p[i].vir_sj; counter = 0;
-			while (tmpi <= p[i].vir_ei&&tmpj <= p[i].vir_ej)
+		case 3://tmpi = p.get(i).vir_si, tmpj = p.get(i).vir_sj, counter = 0;
+			counter = 0;
+			tsi = p.get(i).vir_si;
+			tei = p.get(i).vir_si;
+			tsj = p.get(i).vir_sj;
+			tej = p.get(i).vir_sj;
+			meet_space = false;
+			find_next_s = false;
+			first_save = false;
+			nextsj = p.get(i).vir_sj;
+			nextsi = p.get(i).vir_si;
+			circle_times = p.get(i).vir_ei;
+			while (tei <= circle_times)
+			{
+				if (map[tei*size + tej] != 0)//有子
+				{
+					counter++;
+					if (find_next_s == false)//没找到开头
+					{
+						if (meet_space == false)//没遇到空格
+						{
+							nextsi = tei;
+							nextsj = tej;
+						}
+						else{
+							nextsi = tei;
+							nextsj = tej;
+							find_next_s = true;
+						}
+
+					}
+					tei++;
+					tej++;
+				}
+				else{//此时tej指向空格
+					if (meet_space == false)
+					{
+						if (counter == 0)
+						{
+							while (tei <= circle_times&&map[tei*size + tej] == 0)
+							{
+								tej++;
+								tei++;
+								tsi++;
+								tsj++;
+							}
+						}
+						else
+						{
+							meet_space = true;
+							tei++;
+							tej++;
+						}
+					}
+					else{
+						if (counter == 1)
+						{
+							tsi ++;
+							tei = tsi;
+							tsj ++;
+							tej = tsj;
+							meet_space = false;
+							find_next_s = false;
+							counter = 0;
+							first_save = true; 
+							continue;
+						}
+						if (first_save == false)//
+						{
+							p.get(i).len = counter;
+							p.get(i).vir_si = tsi;
+							p.get(i).vir_sj = tsj;
+							p.get(i).vir_ei = nextsi;
+							p.get(i).vir_ej = nextsj;
+							if (tsi == 0 ||tsj==0 || (tsi > 0&&tsj>0 && map[(tsi - 1)*size + tsj-1] != 0))//
+							{
+								p.get(i).isalive = false;
+							}
+							else{
+								p.get(i).isalive = true;
+							}
+							tsi = nextsi;
+							tei = tsi;
+							tsj = nextsj;
+							tej = tsj;
+							meet_space = false;
+							find_next_s = false;
+							counter = 0;
+							first_save = true;
+						}
+						else{
+							p.add(new Sumforsearch());
+							p.get(p.size() - 1).vir_sj = tsj;
+							p.get(p.size() - 1).vir_ej = nextsj;
+							p.get(p.size() - 1).vir_si = tsi;
+							p.get(p.size() - 1).vir_ei = nextsi;
+							p.get(p.size() - 1).direction = p.get(i).direction;
+							p.get(p.size() - 1).isalive = true;
+							p.get(p.size() - 1).len = counter;
+							tsi = nextsi;
+							tei = tsi;
+							tsj = nextsj;
+							tej = tsj;
+							meet_space = false;
+							find_next_s = false;
+							counter = 0;
+							first_save = true;
+						}
+					}
+				}
+			}
+			if (counter > 1)//记录最后一个连棋，长度大于1才记录
+			{
+				if (first_save==false)//两坐标同时变化，判断一个就可以
+				{
+					p.get(i).len = counter;
+					p.get(i).vir_sj = tsj;
+					p.get(i).vir_si = tsi;
+					p.get(i).vir_ej = nextsj;
+					p.get(i).vir_ei = nextsi;
+					if (nextsi == size - 1 || nextsj == size - 1 || (nextsi < size - 1 && nextsj < size - 1 && map[(nextsi + 1)*size + nextsj + 1] != 0))
+					{
+						p.get(i).isalive = false;
+					}
+					else
+					{
+						if (tsi == 0 || tsj == 0 || (tsi > 0 && tsj>0 && map[(tsi - 1)*size + tsj - 1] != 0))//
+						{
+							p.get(i).isalive = false;
+						}
+						else{
+							p.get(i).isalive = true;
+						}
+					}
+				}
+				else{
+					p.add(new Sumforsearch());
+					p.get(p.size() - 1).vir_sj = tsj;
+					p.get(p.size() - 1).vir_ej = nextsj;
+					p.get(p.size() - 1).vir_si = tsi;
+					p.get(p.size() - 1).vir_ei = nextsi;
+					p.get(p.size() - 1).direction = p.get(i).direction;
+					if (nextsi == size-1 || nextsj == size-1 ||(nextsi<size-1&&nextsj<size-1&& map[(nextsi+1)*size + nextsj+1] != 0))
+					{
+						p.get(p.size() - 1).isalive = false;
+					}
+					else
+					{
+						p.get(p.size() - 1).isalive = true;
+					}
+					p.get(p.size() - 1).len = counter;
+				}
+			}
+			
+			//.........
+			/*while (tmpi <= p.get(i).vir_ei&&tmpj <= p.get(i).vir_ej)
 			{
 				if (map[tmpi*size + tmpj] != 0)
 				{
 					counter++;
 				}
+				
 				tmpi++;
 				tmpj++;
 			}
-			p[i].len = counter;
+			p.get(i).len = counter;*/
 			break;
-		case 4:tmpi = p[i].vir_si; tmpj = p[i].vir_sj; counter = 0;
-			while (tmpi >= p[i].vir_ei&&tmpj <= p[i].vir_ej)
+		case 4://tmpi = p.get(i).vir_si, tmpj = p.get(i).vir_sj, counter = 0;
+			counter = 0;
+			tsi = p.get(i).vir_si;
+			tei = p.get(i).vir_si;
+			tsj = p.get(i).vir_sj;
+			tej = p.get(i).vir_sj;
+			meet_space = false;
+			find_next_s = false;
+			first_save = false;
+			nextsj = p.get(i).vir_sj;
+			nextsi = p.get(i).vir_si;
+			circle_times = p.get(i).vir_ej;
+			while (tej <= circle_times)
+			{
+				if (map[tei*size + tej] != 0)//有子
+				{
+					counter++;
+					if (find_next_s == false)//没找到开头
+					{
+						if (meet_space == false)//没遇到空格
+						{
+							nextsi = tei;
+							nextsj = tej;
+						}
+						else{
+							nextsi = tei;
+							nextsj = tej;
+							find_next_s = true;
+						}
+
+					}
+					tei--;
+					tej++;
+				}
+				else{//此时tej指向空格
+					if (meet_space == false)
+					{
+						if (counter == 0)
+						{
+							while (tej <= circle_times&&map[tei*size + tej] == 0)
+							{
+								tsi--;
+								tsj++;
+								tej++;
+								tei--;
+							}
+						}
+						else
+						{
+							meet_space = true;
+							tei--;
+							tej++;
+						}
+					}
+					else{
+						if (counter == 1)
+						{
+							tsi--;
+							tei = tsi;
+							tsj++;
+							tej = tsj;
+							meet_space = false;
+							find_next_s = false;
+							counter = 0;
+							first_save = true;
+							continue;
+						}
+						if (first_save == false)//两坐标同时变化，判断一个就可以
+						{
+							p.get(i).len = counter;
+							p.get(i).vir_si = tsi;
+							p.get(i).vir_sj = tsj;
+							p.get(i).vir_ei = nextsi;
+							p.get(i).vir_ej = nextsj;
+							if (tsi == size-1 || tsj == 0 || (tsi <size && tsj > 0 && map[(tsi+1)*size + tsj - 1] != 0))//
+							{
+								p.get(i).isalive = false;
+							}
+							else{
+								p.get(i).isalive = true;
+							}
+							tsi = nextsi;
+							tei = tsi;
+							tsj = nextsj;
+							tej = tsj;
+							meet_space = false;
+							find_next_s = false;
+							counter = 0;
+							first_save = true;
+						}
+						else{
+							p.add(new Sumforsearch());
+							p.get(p.size() - 1).vir_sj = tsj;
+							p.get(p.size() - 1).vir_ej = nextsj;
+							p.get(p.size() - 1).vir_si = tsi;
+							p.get(p.size() - 1).vir_ei = nextsi;
+							p.get(p.size() - 1).direction = p.get(i).direction;
+							p.get(p.size() - 1).isalive = true;
+							p.get(p.size() - 1).len = counter;
+							tsi = nextsi;
+							tei = tsi;
+							tsj = nextsj;
+							tej = tsj;
+							meet_space = false;
+							find_next_s = false;
+							counter = 0;
+							first_save = true;
+						}
+					}
+				}
+			}
+			if (counter > 1)
+			{
+				if (first_save==false)//两坐标同时变化，判断一个就可以
+				{
+					p.get(i).len = counter;
+					p.get(i).vir_sj = tsj;
+					p.get(i).vir_si = tsi;
+					p.get(i).vir_ej = nextsj;
+					p.get(i).vir_ei = nextsi;
+					if (nextsi == 0 || nextsj == size - 1 || (nextsi >= 1 && nextsj < size - 1 && map[(nextsi - 1)*size + nextsj + 1] != 0))
+					{
+						p.get(i).isalive = false;
+					}
+					else
+					{
+						if (tsi == size - 1 || tsj == 0 || (tsi <size && tsj > 0 && map[(tsi + 1)*size + tsj - 1] != 0))//
+						{
+							p.get(i).isalive = false;
+						}
+						else{
+							p.get(i).isalive = true;
+						}
+					}
+				}
+				else{
+					p.add(new Sumforsearch());
+					p.get(p.size() - 1).vir_sj = tsj;
+					p.get(p.size() - 1).vir_ej = nextsj;
+					p.get(p.size() - 1).vir_si = tsi;
+					p.get(p.size() - 1).vir_ei = nextsi;
+					p.get(p.size() - 1).direction = p.get(i).direction;
+					if (nextsi == 0 || nextsj == size-1 ||(nextsi>=1&&nextsj<size-1&& map[(nextsi-1)*size + nextsj+1] != 0))
+					{
+						p.get(p.size() - 1).isalive = false;
+					}
+					else
+					{
+						p.get(p.size() - 1).isalive = true;
+					}
+					p.get(p.size() - 1).len = counter;
+				}
+			}
+			
+			//..............................................................
+			/*while (tmpi >= p.get(i).vir_ei&&tmpj <= p.get(i).vir_ej)
 			{
 				if (map[tmpi*size + tmpj] != 0)
 				{
@@ -1118,18 +1768,19 @@ public void search_nodes(int []map, int size)
 				tmpi--;
 				tmpj++;
 			}
-			p[i].len = counter;
+			p.get(i).len = counter;*/
 			break;
 		default:
 			break;
 		}
 	}
+	sum = p.size();//更新sum值
 	//两两匹配，求交点
 	for (i = 0; i < sum; i++)
 	{
 		for (j = i + 1; j < sum; j++)
 		{
-			int judge = is_crossing(p[i].vir_si, p[i].vir_sj, p[i].vir_ei, p[i].vir_ej, p[j].vir_si, p[j].vir_sj, p[j].vir_ei, p[j].vir_ej, map, p[i].direction, p[j].direction);
+			int judge = is_crossing(p.get(i).vir_si, p.get(i).vir_sj, p.get(i).vir_ei, p.get(i).vir_ej, p.get(j).vir_si, p.get(j).vir_sj, p.get(j).vir_ei, p.get(j).vir_ej, map, p.get(i).direction, p.get(j).direction,color);
 			if (judge == 0)
 			{
 				//无交点
@@ -1137,14 +1788,14 @@ public void search_nodes(int []map, int size)
 			else if (judge == 1)
 			{
 				//交点是实点
-				switch (p[i].len)
+				switch (p.get(i).len)
 				{
 				case 2:
-					if (p[j].len == 2)//pi =2 ;pj==2
+					if (p.get(j).len == 2)//pi =2 ;pj==2
 					{
-						if (p[i].isalive == true)
+						if (p.get(i).isalive == true)
 						{
-							if (p[j].isalive == true)//zhenzhen
+							if (p.get(j).isalive == true)//zhenzhen
 							{
 								alive22++;
 							}
@@ -1154,7 +1805,7 @@ public void search_nodes(int []map, int size)
 						}
 						else
 						{
-							if (p[j].isalive == true)//zhenjia
+							if (p.get(j).isalive == true)//zhenjia
 							{
 								halfalive22++;
 							}
@@ -1163,11 +1814,11 @@ public void search_nodes(int []map, int size)
 							}
 						}
 					}
-					else if (p[j].len == 3)//pi 2 pj 3
+					else if (p.get(j).len == 3)//pi 2 pj 3
 					{
-						if (p[i].isalive == true)
+						if (p.get(i).isalive == true)
 						{
-							if (p[j].isalive == true)//zhenzhen
+							if (p.get(j).isalive == true)//zhenzhen
 							{
 								alive23++;
 							}
@@ -1177,7 +1828,7 @@ public void search_nodes(int []map, int size)
 						}
 						else
 						{
-							if (p[j].isalive == true)//zhenjia
+							if (p.get(j).isalive == true)//zhenjia
 							{
 								halfalive23++;
 							}
@@ -1186,10 +1837,10 @@ public void search_nodes(int []map, int size)
 							}
 						}
 					}
-					else {//p[j].len==4
-						if (p[i].isalive == true)
+					else {//p.get(j).len==4
+						if (p.get(i).isalive == true)
 						{
-							if (p[j].isalive == true)//zhenzhen
+							if (p.get(j).isalive == true)//zhenzhen
 							{
 								alive24++;
 							}
@@ -1199,7 +1850,7 @@ public void search_nodes(int []map, int size)
 						}
 						else
 						{
-							if (p[j].isalive == true)//zhenjia
+							if (p.get(j).isalive == true)//zhenjia
 							{
 								halfalive24++;
 							}
@@ -1210,11 +1861,11 @@ public void search_nodes(int []map, int size)
 					}
 					break;
 				case 3:
-					if (p[j].len == 2)//pi =2 ;pj==2
+					if (p.get(j).len == 2)//pi =2 ;pj==2
 					{
-						if (p[i].isalive == true)
+						if (p.get(i).isalive == true)
 						{
-							if (p[j].isalive == true)//zhenzhen
+							if (p.get(j).isalive == true)//zhenzhen
 							{
 								alive23++;
 							}
@@ -1224,7 +1875,7 @@ public void search_nodes(int []map, int size)
 						}
 						else
 						{
-							if (p[j].isalive == true)//zhenjia
+							if (p.get(j).isalive == true)//zhenjia
 							{
 								halfalive23++;
 							}
@@ -1233,11 +1884,11 @@ public void search_nodes(int []map, int size)
 							}
 						}
 					}
-					else if (p[j].len == 3)//pi 2 pj 3
+					else if (p.get(j).len == 3)//pi 2 pj 3
 					{
-						if (p[i].isalive == true)
+						if (p.get(i).isalive == true)
 						{
-							if (p[j].isalive == true)//zhenzhen
+							if (p.get(j).isalive == true)//zhenzhen
 							{
 								alive33++;
 							}
@@ -1247,7 +1898,7 @@ public void search_nodes(int []map, int size)
 						}
 						else
 						{
-							if (p[j].isalive == true)//zhenjia
+							if (p.get(j).isalive == true)//zhenjia
 							{
 								halfalive33++;
 							}
@@ -1256,10 +1907,10 @@ public void search_nodes(int []map, int size)
 							}
 						}
 					}
-					else {//p[j].len==4
-						if (p[i].isalive == true)
+					else {//p.get(j).len==4
+						if (p.get(i).isalive == true)
 						{
-							if (p[j].isalive == true)//zhenzhen
+							if (p.get(j).isalive == true)//zhenzhen
 							{
 								alive34++;
 							}
@@ -1269,7 +1920,7 @@ public void search_nodes(int []map, int size)
 						}
 						else
 						{
-							if (p[j].isalive == true)//zhenjia
+							if (p.get(j).isalive == true)//zhenjia
 							{
 								halfalive34++;
 							}
@@ -1280,11 +1931,11 @@ public void search_nodes(int []map, int size)
 					}
 					break;
 				case 4:
-					if (p[j].len == 2)//pi =2 ;pj==2
+					if (p.get(j).len == 2)//pi =2 ;pj==2
 					{
-						if (p[i].isalive == true)
+						if (p.get(i).isalive == true)
 						{
-							if (p[j].isalive == true)//zhenzhen
+							if (p.get(j).isalive == true)//zhenzhen
 							{
 								alive24++;
 							}
@@ -1294,7 +1945,7 @@ public void search_nodes(int []map, int size)
 						}
 						else
 						{
-							if (p[j].isalive == true)//zhenjia
+							if (p.get(j).isalive == true)//zhenjia
 							{
 								halfalive24++;
 							}
@@ -1303,11 +1954,11 @@ public void search_nodes(int []map, int size)
 							}
 						}
 					}
-					else if (p[j].len == 3)//pi 2 pj 3
+					else if (p.get(j).len == 3)//pi 2 pj 3
 					{
-						if (p[i].isalive == true)
+						if (p.get(i).isalive == true)
 						{
-							if (p[j].isalive == true)//zhenzhen
+							if (p.get(j).isalive == true)//zhenzhen
 							{
 								alive34++;
 							}
@@ -1317,7 +1968,7 @@ public void search_nodes(int []map, int size)
 						}
 						else
 						{
-							if (p[j].isalive == true)//zhenjia
+							if (p.get(j).isalive == true)//zhenjia
 							{
 								halfalive34++;
 							}
@@ -1326,10 +1977,10 @@ public void search_nodes(int []map, int size)
 							}
 						}
 					}
-					else {//p[j].len==4
-						if (p[i].isalive == true)
+					else {//p.get(j).len==4
+						if (p.get(i).isalive == true)
 						{
-							if (p[j].isalive == true)//zhenzhen
+							if (p.get(j).isalive == true)//zhenzhen
 							{
 								alive44++;
 							}
@@ -1341,7 +1992,7 @@ public void search_nodes(int []map, int size)
 						{
 							//1322
 							;
-							if (p[j].isalive == true)//zhenjia
+							if (p.get(j).isalive == true)//zhenjia
 							{
 								halfalive44++;
 							}
@@ -1358,14 +2009,14 @@ public void search_nodes(int []map, int size)
 			else//judge==2
 			{
 				//交点是虚点
-				switch (p[i].len)
+				switch (p.get(i).len)
 				{
 				case 2:
-					if (p[j].len == 2)//pi =2 ;pj==2
+					if (p.get(j).len == 2)//pi =2 ;pj==2
 					{
-						if (p[i].isalive == true)
+						if (p.get(i).isalive == true)
 						{
-							if (p[j].isalive == true)//zhenzhen
+							if (p.get(j).isalive == true)//zhenzhen
 							{
 								vir_alive22++;
 							}
@@ -1375,7 +2026,7 @@ public void search_nodes(int []map, int size)
 						}
 						else
 						{
-							if (p[j].isalive == true)//zhenjia
+							if (p.get(j).isalive == true)//zhenjia
 							{
 								vir_halfalive22++;
 							}
@@ -1384,11 +2035,11 @@ public void search_nodes(int []map, int size)
 							}
 						}
 					}
-					else if (p[j].len == 3)//pi 2 pj 3
+					else if (p.get(j).len == 3)//pi 2 pj 3
 					{
-						if (p[i].isalive == true)
+						if (p.get(i).isalive == true)
 						{
-							if (p[j].isalive == true)//zhenzhen
+							if (p.get(j).isalive == true)//zhenzhen
 							{
 								vir_alive23++;
 							}
@@ -1398,7 +2049,7 @@ public void search_nodes(int []map, int size)
 						}
 						else
 						{
-							if (p[j].isalive == true)//zhenjia
+							if (p.get(j).isalive == true)//zhenjia
 							{
 								vir_halfalive23++;
 							}
@@ -1407,10 +2058,10 @@ public void search_nodes(int []map, int size)
 							}
 						}
 					}
-					else {//p[j].len==4
-						if (p[i].isalive == true)
+					else {//p.get(j).len==4
+						if (p.get(i).isalive == true)
 						{
-							if (p[j].isalive == true)//zhenzhen
+							if (p.get(j).isalive == true)//zhenzhen
 							{
 								vir_alive24++;
 							}
@@ -1420,7 +2071,7 @@ public void search_nodes(int []map, int size)
 						}
 						else
 						{
-							if (p[j].isalive == true)//zhenjia
+							if (p.get(j).isalive == true)//zhenjia
 							{
 								vir_halfalive24++;
 							}
@@ -1431,11 +2082,11 @@ public void search_nodes(int []map, int size)
 					}
 					break;
 				case 3:
-					if (p[j].len == 2)//pi =2 ;pj==2
+					if (p.get(j).len == 2)//pi =2 ;pj==2
 					{
-						if (p[i].isalive == true)
+						if (p.get(i).isalive == true)
 						{
-							if (p[j].isalive == true)//zhenzhen
+							if (p.get(j).isalive == true)//zhenzhen
 							{
 								vir_alive23++;
 							}
@@ -1445,7 +2096,7 @@ public void search_nodes(int []map, int size)
 						}
 						else
 						{
-							if (p[j].isalive == true)//zhenjia
+							if (p.get(j).isalive == true)//zhenjia
 							{
 								vir_halfalive23++;
 							}
@@ -1454,11 +2105,11 @@ public void search_nodes(int []map, int size)
 							}
 						}
 					}
-					else if (p[j].len == 3)//pi 2 pj 3
+					else if (p.get(j).len == 3)//pi 2 pj 3
 					{
-						if (p[i].isalive == true)
+						if (p.get(i).isalive == true)
 						{
-							if (p[j].isalive == true)//zhenzhen
+							if (p.get(j).isalive == true)//zhenzhen
 							{
 								vir_alive33++;
 							}
@@ -1468,7 +2119,7 @@ public void search_nodes(int []map, int size)
 						}
 						else
 						{
-							if (p[j].isalive == true)//zhenjia
+							if (p.get(j).isalive == true)//zhenjia
 							{
 								vir_halfalive33++;
 							}
@@ -1477,10 +2128,10 @@ public void search_nodes(int []map, int size)
 							}
 						}
 					}
-					else {//p[j].len==4
-						if (p[i].isalive == true)
+					else {//p.get(j).len==4
+						if (p.get(i).isalive == true)
 						{
-							if (p[j].isalive == true)//zhenzhen
+							if (p.get(j).isalive == true)//zhenzhen
 							{
 								vir_alive34++;
 							}
@@ -1490,7 +2141,7 @@ public void search_nodes(int []map, int size)
 						}
 						else
 						{
-							if (p[j].isalive == true)//zhenjia
+							if (p.get(j).isalive == true)//zhenjia
 							{
 								vir_halfalive34++;
 							}
@@ -1501,11 +2152,11 @@ public void search_nodes(int []map, int size)
 					}
 					break;
 				case 4:
-					if (p[j].len == 2)//pi =2 ;pj==2
+					if (p.get(j).len == 2)//pi =2 ;pj==2
 					{
-						if (p[i].isalive == true)
+						if (p.get(i).isalive == true)
 						{
-							if (p[j].isalive == true)//zhenzhen
+							if (p.get(j).isalive == true)//zhenzhen
 							{
 								vir_alive24++;
 							}
@@ -1515,7 +2166,7 @@ public void search_nodes(int []map, int size)
 						}
 						else
 						{
-							if (p[j].isalive == true)//zhenjia
+							if (p.get(j).isalive == true)//zhenjia
 							{
 								vir_halfalive24++;
 							}
@@ -1524,11 +2175,11 @@ public void search_nodes(int []map, int size)
 							}
 						}
 					}
-					else if (p[j].len == 3)//pi 2 pj 3
+					else if (p.get(j).len == 3)//pi 2 pj 3
 					{
-						if (p[i].isalive == true)
+						if (p.get(i).isalive == true)
 						{
-							if (p[j].isalive == true)//zhenzhen
+							if (p.get(j).isalive == true)//zhenzhen
 							{
 								vir_alive34++;
 							}
@@ -1538,7 +2189,7 @@ public void search_nodes(int []map, int size)
 						}
 						else
 						{
-							if (p[j].isalive == true)//zhenjia
+							if (p.get(j).isalive == true)//zhenjia
 							{
 								vir_halfalive34++;
 							}
@@ -1547,10 +2198,10 @@ public void search_nodes(int []map, int size)
 							}
 						}
 					}
-					else {//p[j].len==4
-						if (p[i].isalive == true)
+					else {//p.get(j).len==4
+						if (p.get(i).isalive == true)
 						{
-							if (p[j].isalive == true)//zhenzhen
+							if (p.get(j).isalive == true)//zhenzhen
 							{
 								vir_alive44++;
 							}
@@ -1560,7 +2211,7 @@ public void search_nodes(int []map, int size)
 						}
 						else
 						{
-							if (p[j].isalive == true)//zhenjia
+							if (p.get(j).isalive == true)//zhenjia
 							{
 								vir_halfalive44++;
 							}
@@ -1576,60 +2227,90 @@ public void search_nodes(int []map, int size)
 			}
 		}
 	}
-	
+	//free(p);
 }
-public int is_crossing(int si, int sj, int ei, int ej, int sx, int sy, int ex, int ey, int []map, int d1, int d2)
-//0没有交点，1交点是实点，2交点是虚点
+public int is_crossing(int si, int sj, int ei, int ej, int sx, int sy, int ex, int ey, int []map, int d1, int d2,int color)//0没有交点，1交点是实点，2交点是虚点
 {
-	int len1 = max(Math.abs(si - ei) + 1, Math.abs(sj - ej) + 1);
-	int len2 = max(Math.abs(sx - ex) + 1, Math.abs(sy - ey) + 1);
-	int i, j;
-	for (i = 0; i < len1; i++)
+	int p;
+	int x=0;
+	int y=0;
+	si = -si + 14;//转换坐标象限
+	ei = -ei + 14;//转换坐标象限
+	sx = -sx + 14;//转换坐标象限
+	ex = -ex + 14;//转换坐标象限
+	switch (d1)
 	{
-		int recsx = sx, recsy = sy;
-		for (j = 0; j < len2; j++)
+	case 1:switch (d2)
 		{
-			if (si == sx&&sj == sy)
-			{
-				if (map[si*size + sj] == 0)
-				{
-					//cout << "222" << endl;
-					return 2;
-				}
-				else
-				{
-					//cout << "111" << endl;
-					return 1;
-				}
-			}
-			switch (d2)
-			{
-			case 1:sy++; break;
-			case 2:sx++; break;
-			case 3:sx++; sy++; break;
-			case 4:sx--; sy++; break;
-			default:
-				break;
-			}
+			case 1:return 0; 
+			case 2:x = si; y = sy; break;
+			case 3:x = si; p = sx + sy; y = p - x; break;
+			case 4:x = si; p = sx - sy; y = x - p; break;
+			default:break;
 		}
-		sx = recsx;
-		sy = recsy;
-		switch (d1)
+		break;
+	case 2:switch (d2)
 		{
-		case 1:sj++; break;
-		case 2:si++; break;
-		case 3:si++; sj++; break;
-		case 4:si--; sj++; break;
-		default:
-			break;
+			case 1:x = sx; y = sj; break;
+			case 2:return 0; 
+			case 3:y = sj; p = sx + sy; x = p - y; break;
+			case 4:y = sj; p = sx - sy; x = y + p; break;
+			default:break;
+		}
+		break;
+	case 3:switch (d2)
+		{
+			case 1:x = sx; p = si + sj; y = p - x; break;
+			case 2:y = sy; p = si + sj; x = p - y; break;
+			case 3:return 0; 
+			case 4:int q; p = si + sj; q = sx - sy; x = (p + q) / 2; y = (p - q) / 2; break;
+			default:break;
+		}
+		break;
+	case 4:switch (d2)
+		{
+			case 1:x = sx; p = si - sj; y = x - p; break;
+			case 2:y = sy; p = si - sj; x = p + y; break;
+			case 3:return 0; 
+			case 4:int q; p = sx + sy; q = si - sj; x = (p + q) / 2; y = (p - q) / 2; break;
+			default:break;
+		}
+		break;
+	default:break;
+	}
+	//计算交点坐标完毕，将坐标象限转换回去：
+	si = -si + 14;//转换坐标象限
+	ei = -ei + 14;//转换坐标象限
+	sx = -sx + 14;//转换坐标象限
+	ex = -ex + 14;//转换坐标象限
+	x = -x + 14;//转换坐标象限
+	if (x >= 0 && x < size&&y >= 0 && y < size)//坐标合法，在棋盘内
+	{
+		int min_distance_a = min(max(Math.abs(x - si), Math.abs(y - sj)), max(Math.abs(x - ei), Math.abs(y - ej)));
+		int min_distance_b = min(max(Math.abs(x - sx), Math.abs(y - sy)), max(Math.abs(x - ex), Math.abs(y - ey)));
+		if (min_distance_a <=2&& min_distance_b <= 2)
+		{
+			if (map[x*size + y] == color)
+			{
+				return 1;
+			}
+			else if (map[x*size + y] == 0)
+			{
+				return 2;
+			}
 		}
 	}
 	return 0;
 }
 public int max(int a, int b)
-
 {
 	if (a > b)
+		return a;
+	else return b;
+}
+public int min(int a, int b)
+{
+	if (a < b)
 		return a;
 	else return b;
 }

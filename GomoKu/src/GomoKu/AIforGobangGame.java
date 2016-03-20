@@ -22,13 +22,14 @@ class Result{
 public class AIforGobangGame {
 final public int size=15;
 private int myStatus;
-private int stepmap[][];
-private int step;
+private int stepmap[][][];
+private int step[];
 private Player p;
 private NeuralnetworkofGobangBaseFeature mynet;
 private boolean iswin;
 private myIO myio;
 private String encodingType;
+int search_layer;
 private int judge_result(int []map)//判断当前棋局是baiwin还是heiwin还是尚未结束
 {
 	int i, j;
@@ -215,26 +216,46 @@ private int judge_result(int []map)//判断当前棋局是baiwin还是heiwin还是尚未结束
 	}
 	return notfinish;
 }
-private void record(int []map)//记录中己方子为1，不论黑白
-{
-	int tmp[] = new int[size*size];//(int *)malloc(size*size*sizeof(int));//记录对手下完的局面
-	int k;
-	if (myStatus == Player.baistatus)//如果AI执白棋，记录棋局时先翻转
+private void record(int []map,int this_turn)//记录中己方子为1，不论黑白
+//记录中己方子为1，不论黑白
 	{
-		for (k = 0; k < size*size; k++)
+		//int *tmp = (int *)malloc(size*size*sizeof(int));//记录对手下完的局面
+		int tmp[]=new int[size*size];
+		int k;
+		boolean is_init_map = true;//判断是否为初始局面。即无子状态。
+		if (myStatus == Player.baistatus)//如果AI执白棋，记录棋局时先翻转
 		{
-			tmp[k] = map[k] * (-1);
+			for (k = 0; k < size*size; k++)
+			{
+				tmp[k] = map[k] * (-1);
+				if (map[k] != 0)
+				{
+					is_init_map = false;
+				}
+			}
+			
+		}
+		else {
+			for (k = 0; k < size*size; k++)
+			{
+				tmp[k] = map[k];
+				if (map[k] != 0)
+				{
+					is_init_map = false;
+				}
+			}
+			
+		}
+		if (is_init_map==true)//初始局面不记录
+		{
+			//free(tmp);
+		}
+		else//不是初始局面，记录
+		{
+			stepmap[this_turn][step[this_turn]] = tmp;
+			step[this_turn]++;
 		}
 	}
-	else {
-		for (k = 0; k < size*size; k++)
-		{
-			tmp[k] = map[k];
-		}
-	}
-	stepmap[step] = tmp;
-	step++;
-}
 //常量部分：
 public static final int heiwin = 1;//黑赢
 public static final int baiwin = -1;
@@ -248,41 +269,47 @@ public int AIturn;
 public void init()
 {
 	iswin = false;
-	step = 0;
+	step[0]=0;step[1]=0;
 }
-public AIforGobangGame(int status, int turn, float qz1[][], float qz2[],String encode)
+public AIforGobangGame(int status, int turn, float qz1[][], float qz2[],String encode,int search_para)
 {
+	search_layer=search_para;
 	encodingType=encode;
 	myio=new myIO(1);
-	stepmap=new int [size*size][size*size];
+	stepmap=new int [2][size*size][size*size];
 	myStatus = status;
-	p = new Player(myStatus, 0);
+	p = new Player(myStatus, 0,search_para);
 	mynet = new NeuralnetworkofGobangBaseFeature(qz1, qz2);
 	AIturn = turn;
-	step = 0;
+	step = new int[2];
+	step[0]=0;step[1]=0;
 }
-public AIforGobangGame(int status, int turn, NeuralnetworkofGobangBaseFeature net,String encode)
+public AIforGobangGame(int status, int turn, NeuralnetworkofGobangBaseFeature net,String encode,int search_para)
 {
+	search_layer=search_para;
 	encodingType=encode;
 	myio=new myIO(1);
-	stepmap=new int [size*size][size*size];
+	stepmap=new int [2][size*size][size*size];
 	myStatus = status;
-	p = new Player(myStatus, 0);
+	p = new Player(myStatus, 0,search_para);
 	mynet = net;
 	AIturn = turn;
-	step = 0;
+	step = new int[2];
+	step[0]=0;step[1]=0;
 }
-public AIforGobangGame(int status, int turn, String src,String encode)//status是AI的状态，表示执白还是执黑，turn是轮到AI下的时候轮换变量应该等于的值。如果自己实现控制流程也可弃用此变量
+public AIforGobangGame(int status, int turn, String src,String encode,int search_para)//status是AI的状态，表示执白还是执黑，turn是轮到AI下的时候轮换变量应该等于的值。如果自己实现控制流程也可弃用此变量
 //建议使用1和-1作为轮换变量，变更时*-1，1为黑，-1为白，初始为1
 //status必须为1或-1，黑棋为1，白棋为-1
 //src为权值文件路径，文件不存在时自动新建网络
 {
-	stepmap=new int[size*size][size*size];
+	search_layer=search_para;
+	stepmap=new int[2][size*size][size*size];
 myStatus = status;
 encodingType=encode;
-p = new Player(myStatus, 0);
+p = new Player(myStatus, 0,search_para);
 AIturn = turn;
-step = 0;
+step = new int[2];
+step[0]=0;step[1]=0;
 boolean isexist = false;
 myio=new myIO(1);
 isexist = myIO.isFileExist(src);
@@ -314,12 +341,14 @@ else{
 }
 public void makecmd(int []map, Result rst)//对方未成五子时才会调用，因此只会记录未成五子的棋局
 {
-	record(map);
-	p.computermakecmd(map, rst, mynet);
+	record(map,0);
+	p.computermakecmd(map, rst, mynet);//i,j为做出的决策，不改变map
+	map[rst.x*size + rst.y] = myStatus;//下了子之后的局面
+	record(map, 1);//记录
+	map[rst.x*size + rst.y] = 0;//还原map
 }
 public void saveWeight(String src)//导出权值
 {
-	//System.out.println();
 	myio.startWrite(src, encodingType, 0);
 	int i, j;
 	for (i = 0; i < 96; i++)
@@ -334,7 +363,6 @@ public void saveWeight(String src)//导出权值
 		myio.writeOneString(String.valueOf(mynet.quanzhi2[i])+"\r\n", 0);
 	}
 	myio.endWrite(0);
-	System.out.println("xie ru cg");
 }
 public void judge_iswin(int winner)//对iswin进行设置
 {
@@ -348,11 +376,7 @@ public void judge_iswin(int winner)//对iswin进行设置
 }
 public void TD_study()
 {
-	mynet.TD_study(stepmap, step, iswin);//只记录了未成五子的棋局，因此没有step和step-1之分
-	/*for (int r = 0; r < step; r++)//学习完毕，释放空间
-	{
-		
-	}*/
+	mynet.TD_study(stepmap[(search_layer + 1) % 2], step[(search_layer + 1) % 2], iswin);//只记录了未成五子的棋局，因此没有step和step-1之分
 }
 public int judge(int []map)//判断棋局状态
 {

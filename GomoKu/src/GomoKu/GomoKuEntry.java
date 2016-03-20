@@ -30,7 +30,7 @@ public class GomoKuEntry {
 		newOrder = new OrderList();
 		
 		board.repaint(display, shell);
-		ai = new AIforGobangGame(-1, 0, "E:\\quanzhi.txt", "GBK");
+		ai = new AIforGobangGame(-1, -1, "E:\\quanzhi.txt", "GBK",3);
 		
 		shell.addMouseListener(new MouseAdapter(){
 			public void mouseDoubleClick(MouseEvent e){
@@ -128,7 +128,7 @@ public class GomoKuEntry {
 		
 		Button button_reset = new Button(shell,SWT.NONE);
 		button_reset.setBounds(600, 80, 100, 25);
-		button_reset.setText("Reset");
+		button_reset.setText("Reset(重新开始)");
 		button_reset.addSelectionListener(new SelectionAdapter(){
 			public void widgetSelected(SelectionEvent e){
 				newOrder.reset();
@@ -139,17 +139,19 @@ public class GomoKuEntry {
 		
 		Button button_undo = new Button(shell,SWT.NONE);
 		button_undo.setBounds(600, 160, 100, 25);
-		button_undo.setText("Undo");
+		button_undo.setText("Undo(悔棋)");
 		button_undo.addSelectionListener(new SelectionAdapter(){
 			public void widgetSelected(SelectionEvent e){
-				newOrder.undo();
-				board.paint(display, shell, newOrder.list, newOrder.first);
+				//newOrder.undo();
+				//board.paint(display, shell, newOrder.list, newOrder.first);
+				String message="考虑到您先走已经占了极大的优势，我决定去掉悔棋功能。以后多小心吧，想好再下。";
+				MessageDialog.openInformation(shell, null, message);
 			}
 		});
 		
 		Button button_save = new Button(shell,SWT.NONE);
 		button_save.setBounds(600, 240, 100, 25);
-		button_save.setText("Save");
+		button_save.setText("Save(保存棋谱)");
 		button_save.addSelectionListener(new SelectionAdapter(){
 			public void widgetSelected(SelectionEvent e){
 				GomokuSave save = new GomokuSave();
@@ -163,7 +165,7 @@ public class GomoKuEntry {
 		
 		Button button_load = new Button(shell,SWT.NONE);
 		button_load.setBounds(600, 320, 100, 25);
-		button_load.setText("Load");
+		button_load.setText("Load(载入棋谱)");
 		button_load.addSelectionListener(new SelectionAdapter(){
 			public void widgetSelected(SelectionEvent e){
 				GomokuLoad load = new GomokuLoad();
@@ -178,7 +180,7 @@ public class GomoKuEntry {
 		
 		Button button_learn = new Button(shell,SWT.NONE);
 		button_learn.setBounds(600, 400, 100, 25);
-		button_learn.setText("Learn");
+		button_learn.setText("Learn(学习)");
 		button_learn.addSelectionListener(new SelectionAdapter(){
 			public void widgetSelected(SelectionEvent e){
 				newOrder.reset();
@@ -189,6 +191,14 @@ public class GomoKuEntry {
 			}
 		});
 		
+		Button button_refresh = new Button(shell,SWT.NONE);
+		button_refresh.setBounds(600, 480, 100, 25);
+		button_refresh.setText("刷新界面");
+		button_refresh.addSelectionListener(new SelectionAdapter(){
+			public void widgetSelected(SelectionEvent e){
+				board.paint(display, shell, newOrder.list, newOrder.first);	
+			}
+		});
 		////////////////
 		while(!shell.isDisposed()){
 			if(!display.readAndDispatch()){

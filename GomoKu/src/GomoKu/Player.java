@@ -19,6 +19,7 @@ public static final int baizi = -1;
 public static final int nilzi = 0;
 final public int size=15;
 public int tmpcounter=0;
+int search_layer;
 //method:
 public Player()
 {
@@ -30,9 +31,9 @@ public Player()
 	maxint = 10000000;
 	minint = -10000000;
 }
-public Player(int sta, int id)
+public Player(int sta, int id, int search_para)
 {
-	tmpcounter=0;
+	search_layer = search_para;
 	mystatus = sta;
 	cmdi = 0;
 	cmdj = 0;
@@ -44,15 +45,14 @@ public Player(int sta, int id)
 		//报错
 	}
 }
-public float valuefunc(int []p, Result rst, NeuralnetworkofGobangBaseFeature net)
-{//估值函数
+public float valuefunc(int []p, Result rst, NeuralnetworkofGobangBaseFeature net,boolean is_computer_turn){//估值函数
 	//要根据我方执黑/白对+1-1进行转化：
 	//默认我方（电脑） 白
 	int r = notfinish;
 	r = judge(p, rst, 5);
 	//baiwin=-1,heiwin=1
-	if (r == (mystatus*(-1))) { /*printArray(p); system("pause");*/return net.getshuchu() + minint / 2; }
-	else if (r == mystatus)  { /*printArray(p); system("pause");*/ return net.getshuchu() + maxint / 2; }
+	if (r == (mystatus*(-1))) { /*printArray(p); system("pause");*/return  minint / 2; }
+	else if (r == mystatus)  { /*printArray(p); system("pause");*/ return  maxint / 2; }
 	int tmp[]=new int[size*size];
 	int i;
 	if (mystatus == baistatus)
@@ -77,10 +77,10 @@ public float valuefunc(int []p, Result rst, NeuralnetworkofGobangBaseFeature net
 	}
 	net.cal_shuchu();
 	float tmpf;
-	tmpf = net.wofangf.willwin(true);
-	tmpf -= net.duifangf.willwin(false);
-	if (tmpf > 0.3) { /*printArray(tmp); system("pause"); */return net.getshuchu() + maxint / 100 * tmpf; }
-	else if (tmpf < -0.3) { /*printArray(tmp); system("pause");*/ return net.getshuchu() + maxint / 100 * tmpf; }
+	tmpf = net.wofangf.willwin(is_computer_turn);
+	tmpf -= net.duifangf.willwin(!is_computer_turn);
+	if (tmpf > 0.3) { /*printArray(tmp); system("pause"); */return net.getshuchu() + maxint / 100 * tmpf+net.wofangf.count_win_num(is_computer_turn); }
+	else if (tmpf < -0.3) { /*printArray(tmp); system("pause");*/ return net.getshuchu() + maxint / 100 * tmpf + net.duifangf.count_win_num(!is_computer_turn); }
 	//cout << "valuefunc:" << net.getshuchu()<<endl;
 	return net.getshuchu();
 }
@@ -384,7 +384,9 @@ public int judge(int []tmap, Result rst, int lenlian)//判断棋局
 		return heiwin;
 	return notfinish;
 }
-public float search(int []p, Result rst, int depth, int depthlimit, float rootvalue, NeuralnetworkofGobangBaseFeature  net)//depth当前树的深度，根节点为0，depthlimit树深度的限制,如果层数是01234，则一共有5层.首次搜索rootvalue值任意
+public float search(int []p, Result rst, int depth, int depthlimit, float rootvalue, NeuralnetworkofGobangBaseFeature net,int x_first_search_node,int y_first_search_node)
+//depth当前树的深度，根节点为0，depthlimit树深度的限制,如果层数是01234，则一共有5层.首次搜索rootvalue值任意
+//depth当前树的深度，根节点为0，depthlimit树深度的限制,如果层数是01234，则一共有5层.首次搜索rootvalue值任意
 {
 
 	float value = 0;
@@ -399,7 +401,7 @@ public float search(int []p, Result rst, int depth, int depthlimit, float rootva
 	}
 	if (depth == depthlimit - 1)
 	{
-		value = valuefunc(p, rst, net);
+		value = valuefunc(p, rst, net,(boolean)(depthlimit%2==1));
 		//cout << "cengshu" << depth << "zhi:" << value << endl;
 		tmpcounter++;
 		return value;
@@ -408,10 +410,14 @@ public float search(int []p, Result rst, int depth, int depthlimit, float rootva
 	{
 		int x, y;
 		//先搜右下角：
-		for (x = size / 2; x < size; x++)
+		for (x = x_first_search_node; x < size; x++)
 		{
-			for (y = size / 2; y < size; y++)
+			for (y = y_first_search_node; y < size; y++)
 			{
+				/*//调试信息start
+				if (depth == 0)
+					std::cout << x << "  " << y << std::endl;
+					//调试信息end*/
 				if (p[x*size + y] == 0)//未下子
 				{
 					if (mystatus == heistatus)
@@ -444,10 +450,10 @@ public float search(int []p, Result rst, int depth, int depthlimit, float rootva
 						}
 						else{
 							float tmpvalue = value;
-							value = max(search(p, rst, depth + 1, depthlimit, value, net), value);
+							value = max(search(p, rst, depth + 1, depthlimit, value, net,size/2,size/2), value);
 							if (depth == 0 && Math.abs(tmpvalue - value) >= 0.001){//根节点更新值的时候，记录下落子的位置
-								cmdi = new Integer(x);
-								cmdj = new Integer(y);
+								cmdi = x;
+								cmdj = y;
 							}
 						}
 					}
@@ -458,7 +464,7 @@ public float search(int []p, Result rst, int depth, int depthlimit, float rootva
 							return value;
 						}
 						else{
-							value = min(search(p, rst, depth + 1, depthlimit, value, net), value);
+							value = min(search(p, rst, depth + 1, depthlimit, value, net,size/2,size/2), value);
 						}
 
 					}
@@ -469,9 +475,9 @@ public float search(int []p, Result rst, int depth, int depthlimit, float rootva
 			}
 		}
 		//再搜右上角：
-		for (x = size / 2; x >= 0; x--)
+		for (x = x_first_search_node; x >= 0; x--)
 		{
-			for (y = size / 2; y < size; y++)
+			for (y = y_first_search_node; y < size; y++)
 			{
 				if (p[x*size + y] == 0)//未下子
 				{
@@ -505,10 +511,10 @@ public float search(int []p, Result rst, int depth, int depthlimit, float rootva
 						}
 						else{
 							float tmpvalue = value;
-							value = max(search(p, rst, depth + 1, depthlimit, value, net), value);
+							value = max(search(p, rst, depth + 1, depthlimit, value, net,size/2,size/2), value);
 							if (depth == 0 && Math.abs(tmpvalue - value) >= 0.001){//根节点更新值的时候，记录下落子的位置
-								cmdi = new Integer(x);
-								cmdj = new Integer(y);
+								cmdi = x;
+								cmdj = y;
 							}
 						}
 					}
@@ -519,7 +525,7 @@ public float search(int []p, Result rst, int depth, int depthlimit, float rootva
 							return value;
 						}
 						else{
-							value = min(search(p, rst, depth + 1, depthlimit, value, net), value);
+							value = min(search(p, rst, depth + 1, depthlimit, value, net,size/2,size/2), value);
 						}
 
 					}
@@ -530,9 +536,9 @@ public float search(int []p, Result rst, int depth, int depthlimit, float rootva
 			}
 		}
 		//再搜左上角：
-		for (x = size / 2; x >= 0; x--)
+		for (x = x_first_search_node; x >= 0; x--)
 		{
-			for (y = size / 2; y >= 0; y--)
+			for (y = y_first_search_node; y >= 0; y--)
 			{
 				if (p[x*size + y] == 0)//未下子
 				{
@@ -566,10 +572,10 @@ public float search(int []p, Result rst, int depth, int depthlimit, float rootva
 						}
 						else{
 							float tmpvalue = value;
-							value = max(search(p, rst, depth + 1, depthlimit, value, net), value);
+							value = max(search(p, rst, depth + 1, depthlimit, value, net,size/2,size/2), value);
 							if (depth == 0 && Math.abs(tmpvalue - value) >= 0.001){//根节点更新值的时候，记录下落子的位置
-								cmdi = new Integer(x);
-								cmdj = new Integer(y);
+								cmdi = x;
+								cmdj = y;
 							}
 						}
 					}
@@ -580,7 +586,7 @@ public float search(int []p, Result rst, int depth, int depthlimit, float rootva
 							return value;
 						}
 						else{
-							value = min(search(p, rst, depth + 1, depthlimit, value, net), value);
+							value = min(search(p, rst, depth + 1, depthlimit, value, net,size/2,size/2), value);
 						}
 
 					}
@@ -591,9 +597,9 @@ public float search(int []p, Result rst, int depth, int depthlimit, float rootva
 			}
 		}
 		//再搜左下角：
-		for (x = size / 2; x < size; x++)
+		for (x = x_first_search_node; x < size; x++)
 		{
-			for (y = size / 2; y >= 0; y--)
+			for (y = y_first_search_node; y >= 0; y--)
 			{
 				if (p[x*size + y] == 0)//未下子
 				{
@@ -627,21 +633,20 @@ public float search(int []p, Result rst, int depth, int depthlimit, float rootva
 						}
 						else{
 							float tmpvalue = value;
-							value = max(search(p, rst, depth + 1, depthlimit, value, net), value);
+							value = max(search(p, rst, depth + 1, depthlimit, value, net,size/2,size/2), value);
 							if (depth == 0 && Math.abs(tmpvalue - value) >= 0.001){//根节点更新值的时候，记录下落子的位置
-								cmdi = new Integer(x);
-								cmdj = new Integer(y);
+								cmdi = x;
+								cmdj = y;
 							}
 						}
 					}
 					else{//depth%2==1
 						if (rootvalue >= value){
 							p[x*size + y] = 0;
-							//  cout << "cengshu" << depth << "zhi:" << value << endl;
 							return value;
 						}
 						else{
-							value = min(search(p, rst, depth + 1, depthlimit, value, net), value);
+							value = min(search(p, rst, depth + 1, depthlimit, value, net,size/2,size/2), value);
 						}
 
 					}
@@ -649,20 +654,26 @@ public float search(int []p, Result rst, int depth, int depthlimit, float rootva
 				}
 			}
 		}
-		// cout << "cengshu" << depth << "zhi:" << value << endl;
 		return value;
 	}
 }
-public void computermakecmd(int []map, Result rst, NeuralnetworkofGobangBaseFeature  net){
+public void computermakecmd(int []map, Result rst, NeuralnetworkofGobangBaseFeature  net)
+{
 	tmpcounter = 0;
-	int x=0, y = 0;
-	search(map, rst, 0, 3, maxint, net);
-	//先搜3层.此状态下该zijixia
-	if (map[cmdi*size + cmdj] != 0)//要保证x，y是无子点,否则cmdi，cmdj是落子点
-	//cmdj，cmdi的初值是什么？  2013.3.12 重构
+	int x = 0, y = 0;
+	if (search_layer % 2 == 1)
+	{
+		search(map, rst, 0, 3, maxint, net,size/2,size/2);//先搜3层
+	}
+	else{
+		search(map, rst, 0, 2, maxint, net,size/2,size/2);//先搜2层
+	}
+	if(search_layer>3) search(map, rst, 0, search_layer, maxint, net,cmdi,cmdj);//拿少数层搜索的结果作为搜索起点
+	if (map[cmdi*size + cmdj] != 0)
 	{
 		cmdi = x;
 		cmdj = y;
+		
 	}
 	rst.set(cmdi, cmdj);
 }
@@ -674,4 +685,5 @@ public void setmyid(int id){//设置player的id，自己还是对手。
 		//id 值错误
 	}
 }
+
 }
